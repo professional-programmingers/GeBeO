@@ -8,7 +8,13 @@ import pytz
 import discord
 from google.cloud import datastore
 
-token = os.getenv("DISCORD_TOKEN")
+f = open("tokens/discord.cfg", "r")
+discord_token = f.read().strip()
+print(discord_token)
+f.close()
+
+#discord_token = "MTc0NjU1NDY4MjczMjcwNzg2.DBylVQ.bBXPN-KyP3b4gHLc0LbuJ9xFYA0"
+#print(discord_token)
 
 client = discord.Client()
 
@@ -49,32 +55,38 @@ async def on_message(message):
         async for log in client.logs_from(message.channel, limit=100):
             if log.author == message.author:
                 counter += 1
-
         await client.edit_message(tmp, 'You have {} messages.'.format(counter))
+
     elif message.content.startswith('!sleep'):
         await asyncio.sleep(5)
         await client.send_message(message.channel, 'Done sleeping')
+
     elif message.content.startswith('!ayy'):
         nickname = message.server.me.nick
         await client.delete_message(message)
         await client.change_nickname(message.server.me, "ayy")
         await client.send_message(message.channel, "lmao")
         await client.change_nickname(message.server.me, nickname)
+
     elif message.content.startswith('!metoo') or message.content.startswith('!me2'):
         nickname = message.server.me.nick
         await client.delete_message(message)
         await client.change_nickname(message.server.me, "Me Too")
         await client.send_message(message.channel, "Thanks")
         await client.change_nickname(message.server.me, nickname)
+
     elif message.content.startswith('!blowme'):
         await client.delete_message(message)
         await client.send_message(message.channel, "*sucks " + message.author.nick + " off*")
+
     elif message.content.startswith('!esad'):
         await client.delete_message(message)
         await client.send_file(message.channel, "eatshitanddie.png")
+
     elif message.content.startswith('!kermit'):
         await client.delete_message(message)
         await client.send_file(message.channel, "kermit.gif")
+
     elif message.content.startswith('!saymyname'):
         print("test")
         query = dsclient.query(kind='Usernames')
@@ -86,7 +98,10 @@ async def on_message(message):
         else:
             print("madeit")
             await client.send_message(message.channel, "LeagueUsername: " + results[0]['LeagueUsername'])
+
     elif message.content.startswith('!fullstop'):
         sys.exit()
 
-client.run(token)
+
+
+client.run(discord_token)
