@@ -199,3 +199,6 @@ ENV/
 
 # Project
 tokens/
+
+# Vim
+.*swp
