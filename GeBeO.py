@@ -8,7 +8,9 @@ import pytz
 import discord
 from google.cloud import datastore
 
-token = os.getenv("DISCORD_TOKEN")
+f = open("tokens/discord.cfg", "r")
+discord_token = f.read().strip()
+f.close()
 
 client = discord.Client()
 
@@ -27,7 +29,7 @@ async def wednesday_detector():
             if not currently_wednesday:
                 currently_wednesday = True
                 my_dudes = "<:MyDudes:304341572168712193> "
-                await client.send_message(discord.Object(id='274629600976306176'), my_dudes * 3 + "It is Wednesday my dudes" + my_dudes * 3)
+                await client.send_message(client.get_channel('137685095111720961'), my_dudes * 3 + "It is Wednesday my dudes" + my_dudes * 3)
         else:
             currently_wednesday = False
         await asyncio.sleep(60)
@@ -40,44 +42,58 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
+    #loop = asyncio.get_event_loop()
+    #asyncio.run_coroutine_threadsafe(wednesday_detector(), loop)
+
 
 @client.event
 async def on_message(message):
     print(message.author.name + ": " + message.content)
+    message_split = message.content.split(' ')
+    command = message_split[0]
+    args = message_split[1:]
+    print(command)
 
-    if message.content.startswith('!test'):
+    if command in ['!test']:
         counter = 0
         tmp = await client.send_message(message.channel, 'Calculating messages...')
         async for log in client.logs_from(message.channel, limit=100):
             if log.author == message.author:
                 counter += 1
-
         await client.edit_message(tmp, 'You have {} messages.'.format(counter))
-    elif message.content.startswith('!sleep'):
+
+    elif command in ['!sleep']:
         await asyncio.sleep(5)
         await client.send_message(message.channel, 'Done sleeping')
-    elif message.content.startswith('!ayy'):
+
+    elif command in ['!ayy']:
+        print("TEST!!!")
         nickname = message.server.me.nick
         await client.delete_message(message)
         await client.change_nickname(message.server.me, "ayy")
         await client.send_message(message.channel, "lmao")
         await client.change_nickname(message.server.me, nickname)
-    elif message.content.startswith('!metoo') or message.content.startswith('!me2'):
+
+    elif command in ['!metoo', '!me2']:
         nickname = message.server.me.nick
         await client.delete_message(message)
         await client.change_nickname(message.server.me, "Me Too")
         await client.send_message(message.channel, "Thanks")
         await client.change_nickname(message.server.me, nickname)
-    elif message.content.startswith('!blowme'):
+
+    elif command in ['!blowme']:
         await client.delete_message(message)
         await client.send_message(message.channel, "*sucks " + message.author.nick + " off*")
-    elif message.content.startswith('!esad'):
+
+    elif command in ['!esad']:
         await client.delete_message(message)
         await client.send_file(message.channel, "eatshitanddie.png")
-    elif message.content.startswith('!kermit'):
+
+    elif command in ['!kermit']:
         await client.delete_message(message)
         await client.send_file(message.channel, "kermit.gif")
-    elif message.content.startswith('!saymyname'):
+
+    elif command in ['!saymyname']:
         print("test")
         query = dsclient.query(kind='Usernames')
         query.add_filter('DiscordUsername', '=', message.author.name)
@@ -88,7 +104,10 @@ async def on_message(message):
         else:
             print("madeit")
             await client.send_message(message.channel, "LeagueUsername: " + results[0]['LeagueUsername'])
-    elif message.content.startswith('!fullstop'):
+
+    elif command in ['!fullstop']:
         sys.exit()
 
-client.run(token)
+
+#if __name__ == "__main__":
+client.run(discord_token)
