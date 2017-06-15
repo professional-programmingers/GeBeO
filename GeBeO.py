@@ -14,23 +14,25 @@ client = discord.Client()
 
 dsclient = datastore.Client(project="grillbybot")
 
-def wednesday_detector():
-    currently_wednesday = False
+async def wednesday_detector():
+    await client.wait_until_ready()
+    currently_wednesday = True
     tz = pytz.timezone('America/Los_Angeles')
+    print("Started wednesday detector at: " + str(datetime.now(tz)))
     while True:
-        current_time = datetime.now(tz)
+        print("Checking for Wednesday!")
+        current_time = datetime.now()
+        print(current_time.weekday())
         if current_time.weekday() == 2:
             if not currently_wednesday:
                 currently_wednesday = True
-                print("test")
                 my_dudes = "<:MyDudes:304341572168712193> "
-                client.send_message(client.get_channel('137685095111720961'), my_dudes * 3 + "It is Wednesday my dudes" + my_dudes * 3)
+                await client.send_message(discord.Object(id='274629600976306176'), my_dudes * 3 + "It is Wednesday my dudes" + my_dudes * 3)
         else:
             currently_wednesday = False
-        time.sleep(1)
+        await asyncio.sleep(60)
 
-detector = threading.Thread(target=wednesday_detector)
-detector.start()
+client.loop.create_task(wednesday_detector())
 
 @client.event
 async def on_ready():
