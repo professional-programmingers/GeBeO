@@ -8,6 +8,8 @@ import pytz
 import discord
 from google.cloud import datastore
 
+expanding_channels = None
+
 f = open("tokens/discord.cfg", "r")
 discord_token = f.read().strip()
 f.close()
@@ -42,8 +44,10 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
-    #loop = asyncio.get_event_loop()
-    #asyncio.run_coroutine_threadsafe(wednesday_detector(), loop)
+
+    #channels = await client.get_all_channels()
+    #for channel in channels:
+    #    if channel.type == ChannelType.voice and channel.name.split()[-1]
 
 
 @client.event
