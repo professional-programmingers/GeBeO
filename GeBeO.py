@@ -6,6 +6,7 @@ import asyncio
 import threading
 import pytz
 import discord
+import emojitable
 from google.cloud import datastore
 
 expanding_channels = None
@@ -55,8 +56,9 @@ async def on_message(message):
     print(message.author.name + ": " + message.content)
     message_split = message.content.split(' ')
     command = message_split[0]
-    args = message_split[1:]
-    print(command)
+    args_split = message_split[1:]  # Args split into multiple (i.e. no space in args)
+    args = ' '.join(args_split)  # One arg with spaces.
+    
 
     if command in ['!test']:
         counter = 0
@@ -111,6 +113,16 @@ async def on_message(message):
 
     elif command in ['!fullstop']:
         sys.exit()
+
+    elif command in ['!react'] and args:
+        last_message = await client.logs_from(message.channel, limit=1).__anext__()
+        space_counter = 0
+        for char in args:
+            if char == ' ':
+                emoji = emojitable.table[char][space_counter]
+            else:
+                emoji = emojitable.table[char]
+            await client.add_reaction(last_message, emoji)
 
 
 #if __name__ == "__main__":
