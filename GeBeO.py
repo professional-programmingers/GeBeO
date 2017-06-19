@@ -115,7 +115,12 @@ async def on_message(message):
         sys.exit()
 
     elif command in ['!react'] and args:
-        last_message = await client.logs_from(message.channel, limit=1).__anext__()
+        #last_message = [x async for x in client.logs_from(message.channel, limit=2)][1]
+        last_message = []
+        async for i in client.logs_from(message.channel, limit=2):
+            last_message.append(i)
+        last_message = last_message[1]
+        await client.delete_message(message)
         space_counter = 0
         for char in args:
             if char == ' ':
