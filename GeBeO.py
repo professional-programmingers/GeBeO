@@ -137,5 +137,17 @@ async def on_message(message):
                     edited += char.upper()
             await client.send_message(message.channel, edited)
 
+    elif command in ['!mock']:
+        await client.delete_message(message)
+        async for message_to_edit in client.logs_from(message.channel, limit=1, before=message):
+            to_edit = message_to_edit.content
+            edited = ''
+            for char in to_edit:
+                if randint(0, 1) == 0:
+                    edited += char.upper()
+                else:
+                    edited += char.lower()
+            await client.send_message(message.channel, edited)
+
 #if __name__ == "__main__":
 client.run(discord_token)
