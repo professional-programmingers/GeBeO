@@ -1,9 +1,7 @@
-import os
 import sys
-import time
 from datetime import datetime
 import asyncio
-import threading
+from random import randint
 import pytz
 import discord
 import emojitable
@@ -129,6 +127,15 @@ async def on_message(message):
                 emoji = emojitable.table[char]
             await client.add_reaction(last_message, emoji)
 
+    elif command in ['!retard', '!rt']:
+        await client.delete_message(message)
+        async for message_to_edit in client.logs_from(message.channel, limit=1, before=message):
+            to_edit = message_to_edit.content
+            edited = ''
+            for char in to_edit:
+                if randint(0, 1) == 0:
+                    edited += char.upper()
+            await client.send_message(message.channel, edited)
 
 #if __name__ == "__main__":
 client.run(discord_token)
