@@ -9,6 +9,8 @@ from google.cloud import datastore
 
 expanding_channels = None
 
+#Testerino
+
 f = open("tokens/discord.cfg", "r")
 discord_token = f.read().strip()
 f.close()
@@ -56,7 +58,7 @@ async def on_message(message):
     command = message_split[0]
     args_split = message_split[1:]  # Args split into multiple (i.e. no space in args)
     args = ' '.join(args_split)  # One arg with spaces.
-    
+
 
     if command in ['!test']:
         counter = 0
