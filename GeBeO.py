@@ -97,7 +97,6 @@ async def on_message(message):
         sys.exit()
 
     elif command in ['!react'] and args:
-        #last_message = [x async for x in client.logs_from(message.channel, limit=2)][1]
         last_message = []
         async for i in client.logs_from(message.channel, limit=2):
             last_message.append(i)
