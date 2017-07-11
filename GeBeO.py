@@ -9,6 +9,8 @@ from google.cloud import datastore
 
 expanding_channels = None
 
+#another test
+
 f = open("tokens/discord.cfg", "r")
 discord_token = f.read().strip()
 f.close()
