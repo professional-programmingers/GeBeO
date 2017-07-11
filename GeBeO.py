@@ -9,8 +9,6 @@ from google.cloud import datastore
 
 expanding_channels = None
 
-#another test
-
 f = open("tokens/discord.cfg", "r")
 discord_token = f.read().strip()
 f.close()
@@ -99,18 +97,6 @@ async def on_message(message):
     elif command in ['!kermit']:
         await client.delete_message(message)
         await client.send_file(message.channel, "kermit.gif")
-
-    elif command in ['!saymyname']:
-        print("test")
-        query = dsclient.query(kind='Usernames')
-        query.add_filter('DiscordUsername', '=', message.author.name)
-        results = list(query.fetch(1))
-        print(len(results))
-        if len(results) == 0:
-            await client.send_message(message.channel, "Sorry " + message.author.nick + ", can't find your name, try registering")
-        else:
-            print("madeit")
-            await client.send_message(message.channel, "LeagueUsername: " + results[0]['LeagueUsername'])
 
     elif command in ['!fullstop']:
         sys.exit()
