@@ -26,8 +26,9 @@ async def wednesday_detector():
     print("Started wednesday detector at: " + str(datetime.now(tz)))
     while True:
         print("Checking for Wednesday!")
-        current_time = datetime.now()
-        print(current_time.weekday())
+        current_time = datetime.now(tz)
+        print("Current time: ", end="")
+        print(current_time)
         if current_time.weekday() == 2:
             if not currently_wednesday:
                 currently_wednesday = True
