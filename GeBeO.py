@@ -45,11 +45,6 @@ async def on_ready():
     print(client.user.id)
     print('------')
 
-    #channels = await client.get_all_channels()
-    #for channel in channels:
-    #    if channel.type == ChannelType.voice and channel.name.split()[-1]
-
-
 @client.event
 async def on_message(message):
     print(message.author.name + ": " + message.content)
