@@ -106,6 +106,7 @@ async def on_message(message):
         for char in args:
             if char == ' ':
                 emoji = emojitable.table[char][space_counter]
+                space_counter += 1
             else:
                 emoji = emojitable.table[char]
             await client.add_reaction(last_message, emoji)
