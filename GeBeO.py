@@ -132,6 +132,10 @@ async def on_message(message):
         await client.delete_message(message)
         await client.send_file(message.channel, "kermit.gif")
 
+    elif command in ['!doubt', '!suspect']:
+        await client.delete_message(message)
+        await client.send_file(message.channel, "assets/doubt.png")
+
     elif command in ['!fullstop']:
         sys.exit()
 
