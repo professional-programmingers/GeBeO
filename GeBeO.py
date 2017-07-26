@@ -6,6 +6,7 @@ import pytz
 import discord
 import emojitable
 from google.cloud import datastore
+import time
 
 expanding_channels = None
 
@@ -16,6 +17,7 @@ f.close()
 client = discord.Client()
 
 dsclient = datastore.Client(project="grillbybot")
+
 
 async def wednesday_detector():
     await client.wait_until_ready()
@@ -36,13 +38,50 @@ async def wednesday_detector():
             currently_wednesday = False
         await asyncio.sleep(60)
 
-client.loop.create_task(wednesday_detector())
+
+async def timer(duration, length, channel):
+    if duration < 1:
+        return
+    counter = 1
+    text = "```diff\n-  0 |" + " "*length + "| " + str(duration) + "\n```"
+    # Send message
+    message = await client.send_message(channel, text)
+    while counter <= duration:
+        time.sleep(1)
+        # Coloring
+        if counter <= float(duration)/3:
+            text = "```diff\n-"
+        elif counter <= float(duration)*2/3:
+            text = "```fix\n "
+        else: 
+            text = "```diff\n+"
+        # Countup counter
+        text += "  " + str(counter) + " |"
+        # Progress bar calculation
+        progress = int(round(((float(counter)/duration*length))))
+        text += "-"*progress + " "*(length-progress) + "| " + str(duration) + "\n```"
+        await client.edit_message(message, text)
+        counter += 1
+    await client.add_reaction(message, u"\U000023F0")
+
+
+async def react(text, message):
+    space_counter = 0
+    for char in text:
+        if char == ' ':
+            emoji = emojitable.table[char][space_counter]
+            space_counter += 1
+        else:
+            emoji = emojitable.table[char]
+        await client.add_reaction(message, emoji)
+
 
 @client.event
 async def on_ready():
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
+    client.loop.create_task(wednesday_detector())  # Start up wednesay detector
     print('------')
 
 @client.event
@@ -50,8 +89,8 @@ async def on_message(message):
     print(message.author.name + ": " + message.content)
     message_split = message.content.split(' ')
     command = message_split[0]
-    args_split = message_split[1:]  # Args split into multiple (i.e. no space in args)
-    args = ' '.join(args_split)  # One arg with spaces.
+    args_split = message_split[1:]  # Args split into multiple (cannot have space as an argument)
+    arg = ' '.join(args_split)  # One arg with spaces.
 
 
     if command in ['!test']:
@@ -96,20 +135,13 @@ async def on_message(message):
     elif command in ['!fullstop']:
         sys.exit()
 
-    elif command in ['!react'] and args:
+    elif command in ['!react'] and arg:
         last_message = []
         async for i in client.logs_from(message.channel, limit=2):
             last_message.append(i)
         last_message = last_message[1]
+        client.loop.create_task(react(arg, last_message))
         await client.delete_message(message)
-        space_counter = 0
-        for char in args:
-            if char == ' ':
-                emoji = emojitable.table[char][space_counter]
-                space_counter += 1
-            else:
-                emoji = emojitable.table[char]
-            await client.add_reaction(last_message, emoji)
 
     elif command in ['!retard', '!rt']:
         await client.delete_message(message)
@@ -132,6 +164,15 @@ async def on_message(message):
                 else:
                     edited += char.lower()
             await client.send_message(message.channel, edited)
+
+    elif command in ['!timer']:
+        if len(args_split) == 1:
+            duration = int(args_split[0])
+            client.loop.create_task(timer(duration, 100, message.channel))
+        elif len(args_split) == 2:
+            duration = int(args_split[0])
+            length = int(args_split[1])
+            client.loop.create_task(timer(duration, length, message.channel))
 
 #if __name__ == "__main__":
 client.run(discord_token)
