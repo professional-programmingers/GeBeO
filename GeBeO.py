@@ -8,6 +8,7 @@ import emojitable
 from google.cloud import datastore
 import time
 from cowpy import cow
+import re
 
 expanding_channels = None
 
@@ -137,7 +138,7 @@ async def on_message(message):
         await client.delete_message(message)
         async for message_to_edit in client.logs_from(message.channel, limit=1, before=message):
             to_edit = message_to_edit.content
-            edited = '```' + cow.milk_random_cow(to_edit) + '```'
+            edited = '```' + re.sub('```', '', cow.milk_random_cow(to_edit)) + '```'
             await client.send_message(message.channel, edited)
 
     elif command in ['!doubt', '!suspect']:
