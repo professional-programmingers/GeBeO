@@ -13,6 +13,8 @@ import random
 
 expanding_channels = None
 
+wed_detector_channel = '137685095111720961'
+
 f = open("tokens/discord.cfg", "r")
 discord_token = f.read().strip()
 f.close()
@@ -39,7 +41,7 @@ async def wednesday_detector():
             if not currently_wednesday:
                 currently_wednesday = True
                 my_dudes = "<:MyDudes:304341572168712193> "
-                chan = client.get_channel('137685095111720961')
+                chan = client.get_channel(wed_detector_channel)
                 msg = my_dudes * 3 + "It is Wednesday my dudes" + my_dudes * 3
                 await client.send_message(chan, msg)
                 await asyncio.sleep(30)
@@ -125,14 +127,6 @@ async def on_message(message):
         nick = message.author.nick
         await client.send_message(message.channel, "*sucks " + nick + " off*")
 
-    elif command in ['!esad']:
-        await client.delete_message(message)
-        await client.send_file(message.channel, "eatshitanddie.png")
-
-    elif command in ['!kermit']:
-        await client.delete_message(message)
-        await client.send_file(message.channel, "kermit.gif")
-
     elif command in ['!cowsay']:
         await client.delete_message(message)
         messages = client.logs_from(message.channel, limit=1, before=message)
@@ -141,10 +135,6 @@ async def on_message(message):
             random_cow = cow.milk_random_cow(to_edit)
             edited = '```' + re.sub('```', '', random_cow) + '```'
             await client.send_message(message.channel, edited)
-
-    elif command in ['!doubt', '!suspect']:
-        await client.delete_message(message)
-        await client.send_file(message.channel, "assets/doubt.png")
 
     elif command in ['!react'] and arg:
         last_message = []
