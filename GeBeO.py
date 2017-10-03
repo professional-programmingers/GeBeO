@@ -8,6 +8,7 @@ import time
 from cowpy import cow
 import re
 import os
+import requests
 
 expanding_channels = None
 
@@ -90,6 +91,7 @@ async def on_ready():
 @client.event
 async def on_message(message):
     print(message.author.name + ": " + message.content)
+    print(message.attachments)
     message_split = message.content.split(' ')
     command = message_split[0]
     # Args split into multiple (cannot have space as an argument)
@@ -189,5 +191,21 @@ async def on_message(message):
                 if img.split(".")[0] == args_split[0]:
                     await client.send_file(message.channel, "images/" + img)
 
+    elif command in ['!iadd']:
+        client.delete_message(message)
+        if len(message.attachments) == 0:
+            imageerror = "Remember to attach an image"
+            await client.send_message(message.channel, imageerror)
+        else:
+            imageattachment = message.attachments[0]
+            print(imageattachment)
+            if len(args_split) == 0:
+                nameerror = "Please specify a name for the image"
+                await client.send_message(message.channel, nameerror)
+            else:
+                imgf = open("images/" + args_split[0] + "." + imageattachment["url"].split(".")[-1], "wb")
+                imgf.write(requests.get(imageattachment["url"]).content)
+                f.close()
+                await client.send_message(message.channel, "Successfully added " + args_split[0])
 
 client.run(discord_token)
