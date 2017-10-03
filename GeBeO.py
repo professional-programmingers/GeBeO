@@ -198,9 +198,10 @@ async def on_message(message):
             for img in os.listdir("images"):
                 if img.split(".")[0] == args_split[0]:
                     await client.send_file(message.channel, "images/" + img)
+                    break
 
     elif command in ['!iadd']:
-        client.delete_message(message)
+        await client.delete_message(message)
         if len(message.attachments) == 0:
             imageerror = "Remember to attach an image"
             await client.send_message(message.channel, imageerror)
@@ -215,5 +216,16 @@ async def on_message(message):
                 imgf.write(requests.get(imageattachment["url"]).content)
                 f.close()
                 await client.send_message(message.channel, "Successfully added " + args_split[0])
+
+    elif command in ['!irm']:
+        await client.delete_message(message)
+        if len(args_split) == 0:
+            await client.send_message(message.channel, "Which image do I rm?")
+        else:
+            for img in os.listdir("images"):
+                if img.split(".")[0] == args_split[0]:
+                    os.remove("images/" + img)
+                    await client.send_message(message.channel, "Removed " + img.split(".")[0])
+                    break
 
 client.run(discord_token)
