@@ -207,3 +207,4 @@ tokens/
 output.txt
 run.sh
 images/
+startup.sh
