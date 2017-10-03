@@ -8,6 +8,7 @@ import time
 from cowpy import cow
 import re
 import os
+import random
 
 expanding_channels = None
 
@@ -16,6 +17,11 @@ discord_token = f.read().strip()
 f.close()
 
 client = discord.Client()
+
+wednesday_self_reply = ["IT IS",
+                        "IT IS IT IS",
+                        "IT IS!"
+                        ]
 
 
 async def wednesday_detector():
@@ -26,8 +32,8 @@ async def wednesday_detector():
     while True:
         print("Checking for Wednesday!")
         current_time = datetime.now(tz)
-        print("Current time: ", end="")
-        print(current_time)
+        print("Current time: " + str(current_time))
+        print("Weekday = " + str(current_time.weekday()))
         if current_time.weekday() == 2:
             if not currently_wednesday:
                 currently_wednesday = True
@@ -35,6 +41,8 @@ async def wednesday_detector():
                 chan = client.get_channel('137685095111720961')
                 msg = my_dudes * 3 + "It is Wednesday my dudes" + my_dudes * 3
                 await client.send_message(chan, msg)
+                await asyncio.sleep(30)
+                await client.send_message(chan, wednesday_self_reply[random.randrange(len(wednesday_self_reply))])
         else:
             currently_wednesday = False
         await asyncio.sleep(60)
