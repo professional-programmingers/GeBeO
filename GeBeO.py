@@ -182,7 +182,7 @@ async def on_message(message):
         if len(args_split) == 0:
             listofimages = ""
             for img in os.listdir("images"):
-                listofimages += img + "\n"
+                listofimages += img.split(".")[0] + "\n"
             await client.send_message(message.channel, listofimages)
         elif len(args_split) == 1:
             for img in os.listdir("images"):
