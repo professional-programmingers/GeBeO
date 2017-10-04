@@ -15,6 +15,11 @@ expanding_channels = None
 
 wed_detector_channel = '137685095111720961'
 
+role_channel_id = "364921515294064640"
+game1_role_message_id = "364921591655563265"
+
+role_msg_list = []
+
 f = open("tokens/discord.cfg", "r")
 discord_token = f.read().strip()
 f.close()
@@ -95,13 +100,30 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     client.loop.create_task(wednesday_detector())  # Start up wednesay detector
+    role_channel = client.get_channel(role_channel_id)
+    game1_role_message = await client.get_message(role_channel, game1_role_message_id)
+    client.messages.appendleft(game1_role_message)
     print('------')
+
+
+@client.event
+async def on_reaction_add(reaction, user):
+    print("reaction")
+    for rmsg in role_msg_list:
+        if reaction.message.id == rmsg["msg_id"]:
+            print("message")
+            for r in reaction.message.server.roles:
+                if r.name == rmsg["role_name"]:
+                    await client.add_roles(reaction.message.author, r)
+                    print("role")
+                    return
 
 
 @client.event
 async def on_message(message):
     print(message.author.name + ": " + message.content)
     print(message.attachments)
+    print(client.messages)
     message_split = message.content.split(' ')
     command = message_split[0]
     # Args split into multiple (cannot have space as an argument)
@@ -217,5 +239,24 @@ async def on_message(message):
                     os.remove("images/" + img)
                     await client.send_message(message.channel, "Removed " + img.split(".")[0])
                     break
+
+    elif command in ['!rolemsg']:
+        await client.delete_message(message)
+        if len(args_split) != 2:
+            await client.send_message(message.channel, "Wrong")
+        else:
+            role = None
+            for r in message.server.roles:
+                if r.name == args_split[1]:
+                    role = r
+            if role is None:
+                await client.send_message(message.channel, "Can't find that role")
+                return
+            sent_msg = await client.send_message(message.channel, args_split[0])
+            role_msg = {}
+            role_msg["msg_id"] = sent_msg.id
+            role_msg["msg_chan_id"] = sent_msg.channel.id
+            role_msg["role_name"] = args_split[1]
+            role_msg_list.append(role_msg)
 
 client.run(discord_token)
