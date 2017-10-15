@@ -9,8 +9,10 @@ from cowpy import cow
 import re
 import os
 import random
+import sys
 
 expanding_channels = None
+DEBUG = False
 
 f = open("tokens/discord.cfg", "r")
 discord_token = f.read().strip()
@@ -197,5 +199,13 @@ async def on_message(message):
                 if img.split(".")[0] == args_split[0]:
                     await client.send_file(message.channel, "images/" + img)
 
+    elif command in ['!d']:
+        if DEBUG:
+            exec(arg)
 
-client.run(discord_token)
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        if sys.argv[1] == '--debug':
+            print("Running with debug mode on! Don't run this in production!")
+            DEBUG = True
+    client.run(discord_token)
