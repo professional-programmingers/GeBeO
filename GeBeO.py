@@ -8,11 +8,14 @@ import time
 from cowpy import cow
 import re
 import os
+import requests
 import random
 import sys
 
 expanding_channels = None
 DEBUG = False
+
+wed_detector_channel = '137685095111720961'
 
 f = open("tokens/discord.cfg", "r")
 discord_token = f.read().strip()
@@ -40,7 +43,7 @@ async def wednesday_detector():
             if not currently_wednesday:
                 currently_wednesday = True
                 my_dudes = "<:MyDudes:304341572168712193> "
-                chan = client.get_channel('137685095111720961')
+                chan = client.get_channel(wed_detector_channel)
                 msg = my_dudes * 3 + "It is Wednesday my dudes" + my_dudes * 3
                 await client.send_message(chan, msg)
                 await asyncio.sleep(30)
@@ -100,6 +103,7 @@ async def on_ready():
 @client.event
 async def on_message(message):
     print(message.author.name + ": " + message.content)
+    print(message.attachments)
     message_split = message.content.split(' ')
     command = message_split[0]
     # Args split into multiple (cannot have space as an argument)
@@ -125,14 +129,6 @@ async def on_message(message):
         nick = message.author.nick
         await client.send_message(message.channel, "*sucks " + nick + " off*")
 
-    elif command in ['!esad']:
-        await client.delete_message(message)
-        await client.send_file(message.channel, "eatshitanddie.png")
-
-    elif command in ['!kermit']:
-        await client.delete_message(message)
-        await client.send_file(message.channel, "kermit.gif")
-
     elif command in ['!cowsay']:
         await client.delete_message(message)
         messages = client.logs_from(message.channel, limit=1, before=message)
@@ -141,10 +137,6 @@ async def on_message(message):
             random_cow = cow.milk_random_cow(to_edit)
             edited = '```' + re.sub('```', '', random_cow) + '```'
             await client.send_message(message.channel, edited)
-
-    elif command in ['!doubt', '!suspect']:
-        await client.delete_message(message)
-        await client.send_file(message.channel, "assets/doubt.png")
 
     elif command in ['!react'] and arg:
         last_message = []
@@ -198,6 +190,35 @@ async def on_message(message):
             for img in os.listdir("images"):
                 if img.split(".")[0] == args_split[0]:
                     await client.send_file(message.channel, "images/" + img)
+                    break
+
+    elif command in ['!iadd']:
+        await client.delete_message(message)
+        if len(message.attachments) == 0:
+            imageerror = "Remember to attach an image"
+            await client.send_message(message.channel, imageerror)
+        else:
+            imageattachment = message.attachments[0]
+            print(imageattachment)
+            if len(args_split) == 0:
+                nameerror = "Please specify a name for the image"
+                await client.send_message(message.channel, nameerror)
+            else:
+                imgf = open("images/" + args_split[0] + "." + imageattachment["url"].split(".")[-1], "wb")
+                imgf.write(requests.get(imageattachment["url"]).content)
+                f.close()
+                await client.send_message(message.channel, "Successfully added " + args_split[0])
+
+    elif command in ['!irm']:
+        await client.delete_message(message)
+        if len(args_split) == 0:
+            await client.send_message(message.channel, "Which image do I rm?")
+        else:
+            for img in os.listdir("images"):
+                if img.split(".")[0] == args_split[0]:
+                    os.remove("images/" + img)
+                    await client.send_message(message.channel, "Removed " + img.split(".")[0])
+                    break
 
     elif command in ['!d']:
         if DEBUG:
