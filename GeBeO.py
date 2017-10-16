@@ -10,19 +10,21 @@ import re
 import os
 import requests
 import random
+import json
 
 expanding_channels = None
 
-wed_detector_channel = '137685095111720961'
-
-role_channel_id = "364921515294064640"
-game1_role_message_id = "364921591655563265"
-
-role_msg_list = []
+role_msg_list = None
+if os.path.isfile("cache/rolemsg.txt") and os.stat("cache/rolemsg.txt").st_size != 0:
+    role_msg_list = json.loads(open("cache/rolemsg.txt", "r").read())
+else:
+    role_msg_list = []
 
 f = open("tokens/discord.cfg", "r")
 discord_token = f.read().strip()
 f.close()
+
+cache_counter = 0
 
 client = discord.Client()
 
@@ -30,7 +32,6 @@ wednesday_self_reply = ["IT IS",
                         "IT IS IT IS",
                         "IT IS!"
                         ]
-
 
 async def wednesday_detector():
     await client.wait_until_ready()
@@ -100,30 +101,61 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     client.loop.create_task(wednesday_detector())  # Start up wednesay detector
-    role_channel = client.get_channel(role_channel_id)
-    game1_role_message = await client.get_message(role_channel, game1_role_message_id)
-    client.messages.appendleft(game1_role_message)
+    todelete = []
+    for rolemsg in role_msg_list:
+        rolemsg_channel = client.get_channel(rolemsg["msg_chan_id"])
+        try:
+            rolemsg_message = await client.get_message(rolemsg_channel, rolemsg["msg_id"])
+            client.messages.append(rolemsg_message)
+        except discord.NotFound:
+            todelete.append(rolemsg)
+    role_msg_list[:] = [r for r in role_msg_list if r not in todelete]
+    role_msg_cache = open("cache/rolemsg.txt", "w")
+    role_msg_cache.write(json.dumps(role_msg_list))
     print('------')
 
 
 @client.event
 async def on_reaction_add(reaction, user):
-    print("reaction")
     for rmsg in role_msg_list:
         if reaction.message.id == rmsg["msg_id"]:
-            print("message")
+            if reaction.emoji == "✅":
+                for r in reaction.message.server.roles:
+                    if r.name == rmsg["role_name"]:
+                        await client.add_roles(user, r)
+                        return
+            else:
+                await client.remove_reaction(reaction.message, reaction.emoji, user)
+
+
+@client.event
+async def on_reaction_remove(reaction, user):
+    for rmsg in role_msg_list:
+        if reaction.message.id == rmsg["msg_id"]:
             for r in reaction.message.server.roles:
                 if r.name == rmsg["role_name"]:
-                    await client.add_roles(reaction.message.author, r)
-                    print("role")
+                    await client.remove_roles(user, r)
                     return
 
 
 @client.event
 async def on_message(message):
+    global cache_counter
     print(message.author.name + ": " + message.content)
-    print(message.attachments)
-    print(client.messages)
+    cache_counter = cache_counter + 1
+    if cache_counter > 4500:
+        cache_counter = 0
+        todelete = []
+        for rolemsg in role_msg_list:
+            rolemsg_channel = client.get_channel(rolemsg["msg_chan_id"])
+            try:
+                rolemsg_message = await client.get_message(rolemsg_channel, rolemsg["msg_id"])
+                client.messages.append(rolemsg_message)
+            except discord.NotFound:
+                todelete.append(rolemsg)
+        role_msg_list[:] = [r for r in role_msg_list if r not in todelete]
+        role_msg_cache = open("cache/rolemsg.txt", "w")
+        role_msg_cache.write(json.dumps(role_msg_list))
     message_split = message.content.split(' ')
     command = message_split[0]
     # Args split into multiple (cannot have space as an argument)
@@ -253,10 +285,13 @@ async def on_message(message):
                 await client.send_message(message.channel, "Can't find that role")
                 return
             sent_msg = await client.send_message(message.channel, args_split[0])
+            await client.add_reaction(sent_msg, "✅")
             role_msg = {}
             role_msg["msg_id"] = sent_msg.id
             role_msg["msg_chan_id"] = sent_msg.channel.id
             role_msg["role_name"] = args_split[1]
             role_msg_list.append(role_msg)
+            role_msg_cache = open("cache/rolemsg.txt", "w")
+            role_msg_cache.write(json.dumps(role_msg_list))
 
 client.run(discord_token)
