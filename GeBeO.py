@@ -11,8 +11,10 @@ import os
 import requests
 import random
 import json
+import sys
 
 expanding_channels = None
+DEBUG = False
 
 role_msg_list = None
 if os.path.isfile("cache/rolemsg.txt") and os.stat("cache/rolemsg.txt").st_size != 0:
@@ -294,4 +296,13 @@ async def on_message(message):
             role_msg_cache = open("cache/rolemsg.txt", "w")
             role_msg_cache.write(json.dumps(role_msg_list))
 
-client.run(discord_token)
+    elif command in ['!d']:
+        if DEBUG:
+            exec(arg)
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        if sys.argv[1] == '--debug':
+            print("Running with debug mode on! Don't run this in production!")
+            DEBUG = True
+    client.run(discord_token)
