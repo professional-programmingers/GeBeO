@@ -308,6 +308,9 @@ async def on_message(message):
             await client.add_reaction(votekick_msg, "✅")
             await client.add_reaction(votekick_msg, "❎")
 
+    elif command in ['!headcount']:
+        await client.send_message(message.channel, "here!")
+
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         if sys.argv[1] == '--debug':
