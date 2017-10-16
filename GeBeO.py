@@ -276,22 +276,23 @@ async def on_message(message):
 
     elif command in ['!rolemsg']:
         await client.delete_message(message)
-        if len(args_split) != 2:
+        if len(args_split) < 2:
             await client.send_message(message.channel, "Wrong")
         else:
             role = None
+            print(args_split[-1])
             for r in message.server.roles:
-                if r.name == args_split[1]:
+                if r.name == args_split[-1]:
                     role = r
             if role is None:
                 await client.send_message(message.channel, "Can't find that role")
                 return
-            sent_msg = await client.send_message(message.channel, args_split[0])
+            sent_msg = await client.send_message(message.channel, " ".join(args_split[0:-1]))
             await client.add_reaction(sent_msg, "✅")
             role_msg = {}
             role_msg["msg_id"] = sent_msg.id
             role_msg["msg_chan_id"] = sent_msg.channel.id
-            role_msg["role_name"] = args_split[1]
+            role_msg["role_name"] = args_split[-1]
             role_msg_list.append(role_msg)
             role_msg_cache = open("cache/rolemsg.txt", "w")
             role_msg_cache.write(json.dumps(role_msg_list))
