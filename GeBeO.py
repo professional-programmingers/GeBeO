@@ -301,6 +301,13 @@ async def on_message(message):
         if DEBUG:
             exec(arg)
 
+    elif command in ['!votekick']:
+        await client.delete_message(message)
+        if len(args_split) == 1:
+            votekick_msg = await client.send_message(message.channel, "Kick " + args_split[0] + " from the server?")
+            await client.add_reaction(votekick_msg, "✅")
+            await client.add_reaction(votekick_msg, "❎")
+
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         if sys.argv[1] == '--debug':
