@@ -16,11 +16,18 @@ import sys
 expanding_channels = None
 DEBUG = False
 
+if not os.path.exists("cache"):
+    os.makedirs("cache")
+
+if not os.path.exists("images"):
+    os.makedirs("images")
+
 role_msg_list = None
 if os.path.isfile("cache/rolemsg.txt") and os.stat("cache/rolemsg.txt").st_size != 0:
     role_msg_list = json.loads(open("cache/rolemsg.txt", "r").read())
 else:
     role_msg_list = []
+    open("cache/rolemsg.txt", 'w+')
 
 f = open("tokens/discord.cfg", "r")
 discord_token = f.read().strip()
