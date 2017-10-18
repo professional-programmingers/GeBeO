@@ -103,6 +103,9 @@ async def on_ready():
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
+
+    toleave = await client.get_server("310617343111725057")
+    await client.leave_server(toleave)
     client.loop.create_task(wednesday_detector())  # Start up wednesay detector
     todelete = []
     for rolemsg in role_msg_list:
