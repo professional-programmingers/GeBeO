@@ -37,6 +37,7 @@ wednesday_self_reply = ["IT IS",
 
 async def wednesday_detector():
     await client.wait_until_ready()
+    wed_detector_channel = "370316975659810816"
     currently_wednesday = True
     tz = pytz.timezone('America/Los_Angeles')
     print("Started wednesday detector at: " + str(datetime.now(tz)))
