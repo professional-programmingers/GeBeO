@@ -324,14 +324,10 @@ async def on_message(message):
             await client.delete_message(message)
             await client.send_message(message.channel, "Sorry, you must be admin to use that command!")
 
-    elif command in ['!d']:
-        if DEBUG:
-            exec(arg)
-
-    elif command in ['!votekick']:
+    elif command in ['!vote']:
         await client.delete_message(message)
         if len(args_split) == 1:
-            votekick_msg = await client.send_message(message.channel, "Kick " + args_split[0] + " from the server?")
+            votekick_msg = await client.send_message(message.channel, args_split[0] + "?")
             await client.add_reaction(votekick_msg, "✅")
             await client.add_reaction(votekick_msg, "❎")
 
@@ -341,6 +337,10 @@ async def on_message(message):
         else:
             await client.delete_message(message)
             await client.send_message(message.channel, "Sorry, you must be admin to use that command!")
+
+    elif command in ['!d']:
+        if DEBUG:
+            exec(arg)
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
