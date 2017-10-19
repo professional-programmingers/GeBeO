@@ -254,7 +254,6 @@ async def on_message(message):
                     break
 
     elif command in ['!iadd']:
-        await client.delete_message(message)
         if len(message.attachments) == 0:
             imageerror = "Remember to attach an image"
             await client.send_message(message.channel, imageerror)
@@ -269,6 +268,7 @@ async def on_message(message):
                 imgf.write(requests.get(imageattachment["url"]).content)
                 f.close()
                 await client.send_message(message.channel, "Successfully added " + args_split[0])
+        await client.delete_message(message)
 
     elif command in ['!irm']:
         await client.delete_message(message)
