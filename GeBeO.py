@@ -306,19 +306,19 @@ async def on_message(message):
             role_msg_cache = open("cache/rolemsg.txt", "w")
             role_msg_cache.write(json.dumps(role_msg_list))
 
-    elif command in ['!d']:
-        if DEBUG:
-            exec(arg)
-
-    elif command in ['!votekick']:
+    elif command in ['!vote']:
         await client.delete_message(message)
         if len(args_split) == 1:
-            votekick_msg = await client.send_message(message.channel, "Kick " + args_split[0] + " from the server?")
+            votekick_msg = await client.send_message(message.channel, args_split[0] + "?")
             await client.add_reaction(votekick_msg, "✅")
             await client.add_reaction(votekick_msg, "❎")
 
     elif command in ['!headcount']:
         await client.send_message(message.channel, "here!")
+
+    elif command in ['!d']:
+        if DEBUG:
+            exec(arg)
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
