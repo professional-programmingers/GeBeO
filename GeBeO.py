@@ -44,6 +44,7 @@ wednesday_self_reply = ["IT IS",
 
 async def wednesday_detector():
     await client.wait_until_ready()
+    wed_detector_channel = "370316975659810816"
     currently_wednesday = True
     tz = pytz.timezone('America/Los_Angeles')
     print("Started wednesday detector at: " + str(datetime.now(tz)))
@@ -109,6 +110,7 @@ async def on_ready():
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
+
     client.loop.create_task(wednesday_detector())  # Start up wednesay detector
     todelete = []
     for rolemsg in role_msg_list:
