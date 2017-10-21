@@ -247,7 +247,6 @@ async def on_message(message):
             client.loop.create_task(timer(duration, length, message.channel))
 
     elif command in ['!i']:
-        await client.delete_message(message)
         if len(args_split) == 0:
             listofimages = ""
             for img in os.listdir("images"):
