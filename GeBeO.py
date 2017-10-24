@@ -325,10 +325,9 @@ async def on_message(message):
 
     elif command in ['!vote']:
         await client.delete_message(message)
-        if len(args_split) == 1:
-            votekick_msg = await client.send_message(message.channel, args_split[0] + "?")
-            await client.add_reaction(votekick_msg, "✅")
-            await client.add_reaction(votekick_msg, "❎")
+        votekick_msg = await client.send_message(message.channel, arg)
+        await client.add_reaction(votekick_msg, "✅")
+        await client.add_reaction(votekick_msg, "❎")
 
     elif command in ['!headcount']:
         if is_admin:
