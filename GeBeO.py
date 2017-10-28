@@ -28,7 +28,7 @@ f.close()
 
 cache_counter = 0
 
-client = discord.Client()
+client = discord.Client(max_messages=5000)
 
 wednesday_self_reply = ["IT IS",
                         "IT IS IT IS",
@@ -121,6 +121,7 @@ async def on_ready():
 
 @client.event
 async def on_reaction_add(reaction, user):
+    print("reaction detected")
     for rmsg in role_msg_list:
         if reaction.message.id == rmsg["msg_id"]:
             if reaction.emoji == "✅":
