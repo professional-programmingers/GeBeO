@@ -16,11 +16,18 @@ import sys
 expanding_channels = None
 DEBUG = False
 
+if not os.path.exists("cache"):
+    os.makedirs("cache")
+
+if not os.path.exists("images"):
+    os.makedirs("images")
+
 role_msg_list = None
 if os.path.isfile("cache/rolemsg.txt") and os.stat("cache/rolemsg.txt").st_size != 0:
     role_msg_list = json.loads(open("cache/rolemsg.txt", "r").read())
 else:
     role_msg_list = []
+    open("cache/rolemsg.txt", 'w+')
 
 f = open("tokens/discord.cfg", "r")
 discord_token = f.read().strip()
@@ -146,7 +153,11 @@ async def on_reaction_remove(reaction, user):
 @client.event
 async def on_message(message):
     global cache_counter
+    is_admin = message.author.top_role.permissions.administrator
+    print(message.author.top_role.name)
     print(message.author.name + ": " + message.content)
+    if is_admin:
+        print("ISADMIN")
     cache_counter = cache_counter + 1
     if cache_counter > 4500:
         cache_counter = 0
@@ -237,7 +248,6 @@ async def on_message(message):
             client.loop.create_task(timer(duration, length, message.channel))
 
     elif command in ['!i']:
-        await client.delete_message(message)
         if len(args_split) == 0:
             listofimages = ""
             for img in os.listdir("images"):
@@ -250,69 +260,86 @@ async def on_message(message):
                     break
 
     elif command in ['!iadd']:
-        await client.delete_message(message)
-        if len(message.attachments) == 0:
-            imageerror = "Remember to attach an image"
-            await client.send_message(message.channel, imageerror)
-        else:
-            imageattachment = message.attachments[0]
-            print(imageattachment)
-            if len(args_split) == 0:
-                nameerror = "Please specify a name for the image"
-                await client.send_message(message.channel, nameerror)
+        if is_admin:
+            if len(message.attachments) == 0:
+                imageerror = "Remember to attach an image"
+                await client.send_message(message.channel, imageerror)
             else:
-                imgf = open("images/" + args_split[0] + "." + imageattachment["url"].split(".")[-1], "wb")
-                imgf.write(requests.get(imageattachment["url"]).content)
-                f.close()
-                await client.send_message(message.channel, "Successfully added " + args_split[0])
+                imageattachment = message.attachments[0]
+                print(imageattachment)
+                if len(args_split) == 0:
+                    nameerror = "Please specify a name for the image"
+                    await client.send_message(message.channel, nameerror)
+                else:
+                    imgf = open("images/" + args_split[0] + "." + imageattachment["url"].split(".")[-1], "wb")
+                    imgf.write(requests.get(imageattachment["url"]).content)
+                    f.close()
+                    await client.send_message(message.channel, "Successfully added " + args_split[0])
+            await client.delete_message(message)
+        else:
+            await client.delete_message(message)
+            await client.send_message(message.channel, "Sorry, you must be admin to use that command!")
+
 
     elif command in ['!irm']:
-        await client.delete_message(message)
-        if len(args_split) == 0:
-            await client.send_message(message.channel, "Which image do I rm?")
+        if is_admin:
+            await client.delete_message(message)
+            if len(args_split) == 0:
+                await client.send_message(message.channel, "Which image do I rm?")
+            else:
+                for img in os.listdir("images"):
+                    if img.split(".")[0] == args_split[0]:
+                        os.remove("images/" + img)
+                        await client.send_message(message.channel, "Removed " + img.split(".")[0])
+                        break
         else:
-            for img in os.listdir("images"):
-                if img.split(".")[0] == args_split[0]:
-                    os.remove("images/" + img)
-                    await client.send_message(message.channel, "Removed " + img.split(".")[0])
-                    break
+            await client.delete_message(message)
+            await client.send_message(message.channel, "Sorry, you must be admin to use that command!")
+
 
     elif command in ['!rolemsg']:
-        await client.delete_message(message)
-        if len(args_split) < 2:
-            await client.send_message(message.channel, "Wrong")
+        if is_admin:
+            await client.delete_message(message)
+            if len(args_split) < 2:
+                await client.send_message(message.channel, "Wrong")
+            else:
+                role = None
+                print(args_split[-1])
+                for r in message.server.roles:
+                    if r.name == args_split[-1]:
+                        role = r
+                if role is None:
+                    await client.send_message(message.channel, "Can't find that role")
+                    return
+                sent_msg = await client.send_message(message.channel, " ".join(args_split[0:-1]))
+                await client.add_reaction(sent_msg, "✅")
+                role_msg = {}
+                role_msg["msg_id"] = sent_msg.id
+                role_msg["msg_chan_id"] = sent_msg.channel.id
+                role_msg["role_name"] = args_split[-1]
+                role_msg_list.append(role_msg)
+                role_msg_cache = open("cache/rolemsg.txt", "w")
+                role_msg_cache.write(json.dumps(role_msg_list))
         else:
-            role = None
-            print(args_split[-1])
-            for r in message.server.roles:
-                if r.name == args_split[-1]:
-                    role = r
-            if role is None:
-                await client.send_message(message.channel, "Can't find that role")
-                return
-            sent_msg = await client.send_message(message.channel, " ".join(args_split[0:-1]))
-            await client.add_reaction(sent_msg, "✅")
-            role_msg = {}
-            role_msg["msg_id"] = sent_msg.id
-            role_msg["msg_chan_id"] = sent_msg.channel.id
-            role_msg["role_name"] = args_split[-1]
-            role_msg_list.append(role_msg)
-            role_msg_cache = open("cache/rolemsg.txt", "w")
-            role_msg_cache.write(json.dumps(role_msg_list))
+            await client.delete_message(message)
+            await client.send_message(message.channel, "Sorry, you must be admin to use that command!")
+
+    elif command in ['!vote']:
+        await client.delete_message(message)
+        votekick_msg = await client.send_message(message.channel, arg)
+        await client.add_reaction(votekick_msg, "✅")
+        await client.add_reaction(votekick_msg, "❎")
+
+    elif command in ['!headcount']:
+        if is_admin:
+            await client.send_message(message.channel, "here!")
+        else:
+            await client.delete_message(message)
+            await client.send_message(message.channel, "Sorry, you must be admin to use that command!")
 
     elif command in ['!d']:
         if DEBUG:
             exec(arg)
-
-    elif command in ['!votekick']:
-        await client.delete_message(message)
-        if len(args_split) == 1:
-            votekick_msg = await client.send_message(message.channel, "Kick " + args_split[0] + " from the server?")
-            await client.add_reaction(votekick_msg, "✅")
-            await client.add_reaction(votekick_msg, "❎")
-
-    elif command in ['!headcount']:
-        await client.send_message(message.channel, "here!")
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
