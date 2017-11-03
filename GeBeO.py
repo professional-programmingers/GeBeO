@@ -8,7 +8,6 @@ import time
 from cowpy import cow
 import re
 import os
-import requests
 import random
 import json
 import sys
@@ -45,25 +44,29 @@ wednesday_self_reply = ["IT IS",
 async def wednesday_detector():
     await client.wait_until_ready()
     wed_detector_channel = "370316975659810816"
-    currently_wednesday = True
     tz = pytz.timezone('America/Los_Angeles')
+    current_time = datetime.now(tz)
+    last_weekday = current_time.weekday()
     print("Started wednesday detector at: " + str(datetime.now(tz)))
     while True:
-        print("Checking for Wednesday!")
-        current_time = datetime.now(tz)
+        print("Checking for day change!")
         print("Current time: " + str(current_time))
         print("Weekday = " + str(current_time.weekday()))
-        if current_time.weekday() == 2:
-            if not currently_wednesday:
-                currently_wednesday = True
+        christmas = datetime(current_time.year, 12, 25, tzinfo=tz)
+        if christmas < current_time:
+            christmas = datetime(current_time.year + 1, 12, 25, tzinfo=tz)
+        christmas_count = christmas - current_time
+        await client.change_presence(game=discord.Game(name=str(christmas_count.days) + " days to Christmas"), status=discord.Status.online, afk=False)
+        current_weekday = current_time.weekday()
+        if current_weekday != last_weekday:
+            last_weekday = current_weekday
+            if current_weekday == 2:
                 my_dudes = "<:MyDudes:304341572168712193> "
                 chan = client.get_channel(wed_detector_channel)
                 msg = my_dudes * 3 + "It is Wednesday my dudes" + my_dudes * 3
                 await client.send_message(chan, msg)
                 await asyncio.sleep(30)
                 await client.send_message(chan, wednesday_self_reply[random.randrange(len(wednesday_self_reply))])
-        else:
-            currently_wednesday = False
         await asyncio.sleep(60)
 
 
