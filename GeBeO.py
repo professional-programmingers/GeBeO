@@ -3,6 +3,7 @@ import asyncio
 from random import randint
 import pytz
 import discord
+import requests
 import emojitable
 import time
 from cowpy import cow
