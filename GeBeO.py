@@ -22,6 +22,9 @@ if not os.path.exists("cache"):
 if not os.path.exists("images"):
     os.makedirs("images")
 
+if not os.path.exists("sounds"):
+    os.makedirs("sounds")
+
 role_msg_list = None
 if os.path.isfile("cache/rolemsg.txt") and os.stat("cache/rolemsg.txt").st_size != 0:
     role_msg_list = json.loads(open("cache/rolemsg.txt", "r").read())
@@ -107,6 +110,10 @@ async def react(text, message):
         else:
             emoji = emojitable.table[char]
         await client.add_reaction(message, emoji)
+
+
+def after_sound_clip(player):
+    player.vc.loop.create_task(player.vc.disconnect())
 
 
 @client.event
@@ -277,7 +284,7 @@ async def on_message(message):
                 else:
                     imgf = open("images/" + args_split[0] + "." + imageattachment["url"].split(".")[-1], "wb")
                     imgf.write(requests.get(imageattachment["url"]).content)
-                    f.close()
+                    imgf.close()
                     await client.send_message(message.channel, "Successfully added " + args_split[0])
             await client.delete_message(message)
         else:
@@ -340,6 +347,71 @@ async def on_message(message):
         else:
             await client.delete_message(message)
             await client.send_message(message.channel, "Sorry, you must be admin to use that command!")
+    
+    elif command in ['!s']:
+        if len(args_split) == 0:
+            listofsounds = ""
+            for snd in os.listdir("sounds"):
+                listofsounds += snd.split(".")[0] + "\n"
+            await client.send_message(message.channel, listofsounds)
+        elif len(args_split) == 1:
+            for snd in os.listdir("sounds"):
+                if snd.split(".")[0] == args_split[0]:
+                    vchan = message.author.voice.voice_channel
+                    if vchan == None:
+                        await client.send_message(message.channel, "You're not in a voice channel!")
+                    else:
+                        voice = await client.join_voice_channel(vchan)
+                        player = voice.create_ffmpeg_player("sounds/" + snd, after=after_sound_clip)
+                        player.vc = voice
+                        player.start()
+                    break
+
+    elif command in ['!sadd']:
+        if is_admin:
+            if len(message.attachments) == 0:
+                sounderror = "Remember to attach a sound file"
+                await client.send_message(message.channel, sounderror)
+            else:
+                soundattachment = message.attachments[0]
+                print(soundattachment)
+                if len(args_split) == 0:
+                    nameerror = "Please specify a name for the image"
+                    await client.send_message(message.channel, nameerror)
+                else:
+                    sndf = open("sounds/" + args_split[0] + "." + soundattachment["url"].split(".")[-1], "wb")
+                    sndf.write(requests.get(soundattachment["url"]).content)
+                    sndf.close()
+                    await client.send_message(message.channel, "Successfully added " + args_split[0])
+            await client.delete_message(message)
+        else:
+            await client.delete_message(message)
+            await client.send_message(message.channel, "Sorry, you must be admin to use that command!")
+
+
+    elif command in ['!srm']:
+        if is_admin:
+            await client.delete_message(message)
+            if len(args_split) == 0:
+                await client.send_message(message.channel, "Which sound do I rm?")
+            else:
+                for snd in os.listdir("sounds"):
+                    if snd.split(".")[0] == args_split[0]:
+                        os.remove("sounds/" + snd)
+                        await client.send_message(message.channel, "Removed " + snd.split(".")[0])
+                        break
+        else:
+            await client.delete_message(message)
+            await client.send_message(message.channel, "Sorry, you must be admin to use that command!")
+
+    elif command in ['!sstop']:
+        print("stopping voice")
+        for vc in client.voice_clients:
+            for m in vc.channel.voice_members:
+                if message.author == m:
+                    await vc.disconnect()
+                    return
+        await client.send_message(message.channel, "You're not in a voice chat!")
 
     elif command in ['!d']:
         if DEBUG:

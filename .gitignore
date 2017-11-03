@@ -207,5 +207,6 @@ tokens/
 output.txt
 run.sh
 images/
+sounds/
 startup.sh
 cache/rolemsg.txt
