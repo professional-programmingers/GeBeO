@@ -351,7 +351,7 @@ async def on_message(message):
     elif command in ['!s']:
         if len(args_split) == 0:
             listofsounds = ""
-            for snd in os.listdir("sounds"):
+            for snd in sorted(os.listdir("sounds")):
                 listofsounds += snd.split(".")[0] + "\n"
             await client.send_message(message.channel, listofsounds)
         elif len(args_split) == 1:
