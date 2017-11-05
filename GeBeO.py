@@ -261,12 +261,12 @@ async def on_message(message):
     elif command in ['!i']:
         if len(args_split) == 0:
             listofimages = ""
-            for img in os.listdir("images"):
+            for img in sorted(os.listdir("images")):
                 listofimages += img.split(".")[0] + "\n"
             await client.send_message(message.channel, listofimages)
         elif len(args_split) == 1:
             for img in os.listdir("images"):
-                if img.split(".")[0] == args_split[0]:
+                if img.split(".")[0] == args_split[0].lower():
                     await client.send_file(message.channel, "images/" + img)
                     break
 
@@ -282,10 +282,10 @@ async def on_message(message):
                     nameerror = "Please specify a name for the image"
                     await client.send_message(message.channel, nameerror)
                 else:
-                    imgf = open("images/" + args_split[0] + "." + imageattachment["url"].split(".")[-1], "wb")
+                    imgf = open("images/" + args_split[0].lower() + "." + imageattachment["url"].split(".")[-1], "wb")
                     imgf.write(requests.get(imageattachment["url"]).content)
                     imgf.close()
-                    await client.send_message(message.channel, "Successfully added " + args_split[0])
+                    await client.send_message(message.channel, "Successfully added " + args_split[0].lower())
             await client.delete_message(message)
         else:
             await client.delete_message(message)
@@ -356,7 +356,7 @@ async def on_message(message):
             await client.send_message(message.channel, listofsounds)
         elif len(args_split) == 1:
             for snd in os.listdir("sounds"):
-                if snd.split(".")[0] == args_split[0]:
+                if snd.split(".")[0] == args_split[0].lower():
                     vchan = message.author.voice.voice_channel
                     if vchan == None:
                         await client.send_message(message.channel, "You're not in a voice channel!")
@@ -379,10 +379,10 @@ async def on_message(message):
                     nameerror = "Please specify a name for the image"
                     await client.send_message(message.channel, nameerror)
                 else:
-                    sndf = open("sounds/" + args_split[0] + "." + soundattachment["url"].split(".")[-1], "wb")
+                    sndf = open("sounds/" + args_split[0].lower() + "." + soundattachment["url"].split(".")[-1], "wb")
                     sndf.write(requests.get(soundattachment["url"]).content)
                     sndf.close()
-                    await client.send_message(message.channel, "Successfully added " + args_split[0])
+                    await client.send_message(message.channel, "Successfully added " + args_split[0].lower())
             await client.delete_message(message)
         else:
             await client.delete_message(message)
