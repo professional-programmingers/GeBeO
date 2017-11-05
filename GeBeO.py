@@ -413,6 +413,17 @@ async def on_message(message):
                     return
         await client.send_message(message.channel, "You're not in a voice chat!")
 
+    elif command in ['!yt']:
+        vchan = message.author.voice.voice_channel
+        if vchan == None:
+            await client.send_message(message.channel, "You're not in a voice channel!")
+        else:
+            voice = await client.join_voice_channel(vchan)
+            player = voice.create_ytdl_player(arg, after=after_sound_clip)
+            player.vc = voice
+            player.start()
+
+
     elif command in ['!d']:
         if DEBUG:
             exec(arg)
