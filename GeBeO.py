@@ -419,7 +419,7 @@ async def on_message(message):
             await client.send_message(message.channel, "You're not in a voice channel!")
         else:
             voice = await client.join_voice_channel(vchan)
-            player = voice.create_ytdl_player(arg, after=after_sound_clip)
+            player = await voice.create_ytdl_player(arg, after=after_sound_clip)
             player.vc = voice
             player.start()
 
