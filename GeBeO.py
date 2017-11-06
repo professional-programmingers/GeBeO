@@ -425,6 +425,7 @@ async def on_message(message):
 
     elif command in ['!say']:
         await client.send_message(message.channel, arg)
+        await client.delete_message(message)
 
     elif command in ['!d']:
         if DEBUG:
