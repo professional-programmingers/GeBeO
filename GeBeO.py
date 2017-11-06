@@ -167,6 +167,8 @@ async def on_message(message):
     is_admin = message.author.top_role.permissions.administrator
     print(message.author.top_role.name)
     print(message.author.name + ": " + message.content)
+    if message.author.id == client.user.id:
+        return
     if is_admin:
         print("ISADMIN")
     cache_counter = cache_counter + 1
