@@ -423,6 +423,8 @@ async def on_message(message):
             player.vc = voice
             player.start()
 
+    elif command in ['!say']:
+        await client.send_message(message.channel, arg)
 
     elif command in ['!d']:
         if DEBUG:
