@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-startup_extensions = ["simplesay", "complexsay", "react", "timer", "filebased", "rolemsg", "daydetector", "debug"]
+startup_extensions = ["simplesay", "complexsay", "react", "timer", "filebased", "rolemsg", "daydetector", "debugcmds"]
 
 bot = None
 
