@@ -6,10 +6,6 @@ import os
 class RoleMsg():
     def __init__(self, bot : commands.Bot):
         print("initializing rolemsg")
-        bot.add_listener(self.on_reaction_add)
-        bot.add_listener(self.on_reaction_remove)
-        bot.add_listener(self.on_message)
-        bot.add_listener(self.on_ready)
         self.bot = bot
 
         if not os.path.exists("cache"):
