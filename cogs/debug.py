@@ -7,7 +7,7 @@ class Debug():
         if len(sys.argv) > 1:
             if sys.argv[1] == '--debug':
                 print("Running with debug mode on! Don't run this in production!")
-                debugarg = True
+                self.debugarg = True
         self.bot = bot
 
     debugarg = False

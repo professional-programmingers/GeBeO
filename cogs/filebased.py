@@ -24,7 +24,7 @@ class Debug():
                     break
 
     async def imagehandler(self, message : discord.Message, filename : str):
-        await self.bot.send_file(message.channel, filename)
+        await self.bot.upload(filename)
 
     def after_sound_clip(self, player):
         player.vc.loop.create_task(player.vc.disconnect())
@@ -114,7 +114,7 @@ class Debug():
         arg = ' '.join(ctx.message.content.split(' ')[1:])
         vchan = ctx.message.author.voice.voice_channel
         if vchan == None:
-            await self.bot.send_message(message.channel, "You're not in a voice channel!")
+            await self.bot.say("You're not in a voice channel!")
         else:
             voice = await self.bot.join_voice_channel(vchan)
             player = await voice.create_ytdl_player(arg, after=self.after_sound_clip)

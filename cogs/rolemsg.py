@@ -11,6 +11,9 @@ class RoleMsg():
         bot.add_listener(self.on_message)
         bot.add_listener(self.on_ready)
         self.bot = bot
+
+        if not os.path.exists("cache"):
+            os.makedirs("cache")
         if os.path.isfile("cache/rolemsg.txt") and os.stat("cache/rolemsg.txt").st_size != 0:
             self.role_msg_list = json.loads(open("cache/rolemsg.txt", "r").read())
         else:
@@ -67,7 +70,7 @@ class RoleMsg():
         args_split = ctx.message.content.split(' ')[1:]
         await self.bot.delete_message(ctx.message)
         if len(args_split) < 2:
-            await self.bot.send_message(ctx.message.channel, "Wrong")
+            await self.bot.say("Wrong")
         else:
             role = None
             print(args_split[-1])
@@ -75,9 +78,9 @@ class RoleMsg():
                 if r.name == args_split[-1]:
                     role = r
             if role is None:
-                await self.bot.send_message(ctx.message.channel, "Can't find that role")
+                await self.bot.say("Can't find that role")
                 return
-            sent_msg = await self.bot.send_message(ctx.message.channel, " ".join(args_split[0:-1]))
+            sent_msg = await self.bot.say(" ".join(args_split[0:-1]))
             await self.bot.add_reaction(sent_msg, "✅")
             role_msg = {}
             role_msg["msg_id"] = sent_msg.id
