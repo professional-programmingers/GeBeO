@@ -4,7 +4,7 @@ import os
 import requests
 import glob
 
-class Debug():
+class FileBased():
     def __init__(self, bot : commands.Bot):
         print("initializing filebased")
         self.bot = bot
@@ -139,4 +139,4 @@ def setup(bot):
     if not os.path.exists("sounds"):
         os.makedirs("sounds")
 
-    bot.add_cog(Debug(bot))
+    bot.add_cog(FileBased(bot))
