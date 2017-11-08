@@ -59,8 +59,6 @@ class ComplexSay():
         await self.bot.send_message(ctx.message.channel, arg)
         await self.bot.delete_message(ctx.message)
 
-
-
 def setup(bot):
     print("setting up complexsay")
     bot.add_cog(ComplexSay(bot))

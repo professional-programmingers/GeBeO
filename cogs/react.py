@@ -6,7 +6,7 @@ class React():
         print("initializing react")
         self.bot = bot
 
-    async def react(self, text, message):
+    async def reacthelper(self, text, message):
         space_counter = 0
         for char in text:
             if char == ' ':
@@ -23,7 +23,7 @@ class React():
         async for i in self.bot.logs_from(ctx.message.channel, limit=2):
             last_message.append(i)
         last_message = last_message[1]
-        self.bot.loop.create_task(self.react(arg, last_message))
+        self.bot.loop.create_task(self.reacthelper(arg, last_message))
         await self.bot.delete_message(ctx.message)
 
 def setup(bot):
