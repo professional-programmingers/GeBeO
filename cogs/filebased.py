@@ -10,7 +10,6 @@ class Debug():
         self.bot = bot
 
     async def filelister(self, dir : str):
-
         listoffiles = sorted(os.listdir(dir))
         listresponse = ""
         if listoffiles != []:
@@ -51,18 +50,20 @@ class Debug():
             fileerror = "Remember to attach a file"
             await self.bot.say(fileerror)
         else:
-            existing_file = glob.glob(args_split[0].lower() + ".*")
-            print(existing_file)
-            fileattachment = message.attachments[0]
-            print(fileattachment)
-            if len(args_split) == 0:
-                nameerror = "Please specify a name for the file"
-                await self.bot.say(nameerror)
+            existing_file = glob.glob(dir + "/" + args_split[0].lower() + ".*")
+            if existing_file == []:
+                fileattachment = message.attachments[0]
+                print(fileattachment)
+                if len(args_split) == 0:
+                    nameerror = "Please specify a name for the file"
+                    await self.bot.say(nameerror)
+                else:
+                    f = open(dir + "/" + args_split[0].lower() + "." + fileattachment["url"].split(".")[-1], "wb")
+                    f.write(requests.get(fileattachment["url"]).content)
+                    f.close()
+                    await self.bot.say("Successfully added " + args_split[0].lower())
             else:
-                f = open(dir + "/" + args_split[0].lower() + "." + fileattachment["url"].split(".")[-1], "wb")
-                f.write(requests.get(fileattachment["url"]).content)
-                f.close()
-                await self.bot.say("Successfully added " + args_split[0].lower())
+                await self.bot.say("That image already exists, choose another name or delete it")
         await self.bot.delete_message(message)
 
     async def fileremover(self, dir : str, message : discord.Message):
