@@ -42,7 +42,7 @@ class ComplexSay():
                     edited += char.upper()
                 else:
                     edited += char.lower()
-            await self.bot.send_message(ctx.message.channel, edited)
+            await self.bot.say(edited)
 
 
     @commands.command(pass_context=True)
@@ -56,7 +56,7 @@ class ComplexSay():
     @commands.command(pass_context=True)
     async def say(self, ctx : commands.Context):
         arg = ' '.join(ctx.message.content.split(' ')[1:])
-        await self.bot.send_message(ctx.message.channel, arg)
+        await self.bot.say(arg)
         await self.bot.delete_message(ctx.message)
 
 def setup(bot):
