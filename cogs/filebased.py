@@ -2,6 +2,7 @@ from discord.ext import commands
 import discord
 import os
 import requests
+import glob
 
 class Debug():
     def __init__(self, bot : commands.Bot):
@@ -9,10 +10,15 @@ class Debug():
         self.bot = bot
 
     async def filelister(self, dir : str):
-        listoffiles = ""
-        for f in sorted(os.listdir(dir)):
-            listoffiles += f.split(".")[0] + "\n"
-        await self.bot.say(listoffiles)
+
+        listoffiles = sorted(os.listdir(dir))
+        listresponse = ""
+        if listoffiles != []:
+            for f in listoffiles:
+                listresponse += f.split(".")[0] + "\n"
+        else:
+            listresponse = "Can't find anything, add something!"
+        await self.bot.say(listresponse)
 
     async def filegetter(self, dir : str, message : discord.Message, handler):
         message_split = message.content.split(' ')
@@ -45,6 +51,8 @@ class Debug():
             fileerror = "Remember to attach a file"
             await self.bot.say(fileerror)
         else:
+            existing_file = glob.glob(args_split[0].lower() + ".*")
+            print(existing_file)
             fileattachment = message.attachments[0]
             print(fileattachment)
             if len(args_split) == 0:
