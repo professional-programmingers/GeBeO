@@ -1,9 +1,9 @@
 from discord.ext import commands
 import sys
 
-class Debug():
+class DebugCmds():
     def __init__(self, bot : commands.Bot):
-        print("initializing debug")
+        print("initializing debugcmds")
         if len(sys.argv) > 1:
             if sys.argv[1] == '--debug':
                 print("Running with debug mode on! Don't run this in production!")
@@ -23,6 +23,5 @@ class Debug():
         await self.bot.say("here!")
 
 def setup(bot : commands.Bot):
-    print("setting up debug")
-    bot.add_cog(Debug(bot))
-
+    print("setting up debugcmds")
+    bot.add_cog(DebugCmds(bot))
