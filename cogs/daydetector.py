@@ -20,7 +20,7 @@ class DayDetector():
         wed_detector_channel = "167319706863140864"
         tz = pytz.timezone('America/Los_Angeles')
         current_time = datetime.now(tz)
-        last_weekday = current_time.minute
+        last_weekday = current_time.weekday()
         print("Started day detector at: " + str(datetime.now(tz)))
         while True:
             current_time = datetime.now(tz)
@@ -32,11 +32,11 @@ class DayDetector():
                 christmas = datetime(current_time.year + 1, 12, 25, tzinfo=tz)
             christmas_count = christmas - current_time
             await self.bot.change_presence(game=discord.Game(name=str(christmas_count.days) + " days to Christmas"), status=discord.Status.online, afk=False)
-            current_weekday = current_time.minute
+            current_weekday = current_time.weekday()
             if current_weekday != last_weekday:
                 print("ayyyyy we did it")
                 last_weekday = current_weekday
-                if current_weekday == 23:
+                if current_weekday == 2:
                     my_dudes = "<:MyDudes:304341572168712193> "
                     chan = self.bot.get_channel(wed_detector_channel)
                     msg = my_dudes * 3 + "It is Wednesday my dudes" + my_dudes * 3
