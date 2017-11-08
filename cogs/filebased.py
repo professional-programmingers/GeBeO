@@ -15,11 +15,13 @@ class Debug():
         await self.bot.say(listoffiles)
 
     async def filegetter(self, dir : str, message : discord.Message, handler):
-        args_split = message.content.split(' ')[1:]
-        for f in os.listdir(dir):
-            if f.split(".")[0] == args_split[0].lower():
-                await handler(message, dir + "/" + f)
-                break
+        message_split = message.content.split(' ')
+        if len(message_split) > 1:
+            args_split = message_split[1:]
+            for f in os.listdir(dir):
+                if f.split(".")[0] == args_split[0].lower():
+                    await handler(message, dir + "/" + f)
+                    break
 
     async def imagehandler(self, message : discord.Message, filename : str):
         await self.bot.send_file(message.channel, filename)
@@ -109,15 +111,23 @@ class Debug():
 
     @commands.command(pass_context=True)
     async def yt(self, ctx : commands.Context):
+        arg = ' '.join(ctx.message.content.split(' ')[1:])
         vchan = ctx.message.author.voice.voice_channel
         if vchan == None:
-            await bot.send_message(message.channel, "You're not in a voice channel!")
+            await self.bot.send_message(message.channel, "You're not in a voice channel!")
         else:
-            voice = await bot.join_voice_channel(vchan)
+            voice = await self.bot.join_voice_channel(vchan)
             player = await voice.create_ytdl_player(arg, after=self.after_sound_clip)
             player.vc = voice
             player.start()
 
 def setup(bot):
     print("setting up filebased")
+
+    if not os.path.exists("images"):
+        os.makedirs("images")
+
+    if not os.path.exists("sounds"):
+        os.makedirs("sounds")
+
     bot.add_cog(Debug(bot))

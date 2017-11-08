@@ -23,7 +23,7 @@ class SimpleSay():
     @commands.command(pass_context=True)
     async def blowme(self, ctx : commands.Context):
         await self.bot.delete_message(ctx.message)
-        await self.bot.say("*sucks " + ctx.message.author + " off*")
+        await self.bot.say("*sucks " + ctx.message.author.nick + " off*")
 
 def setup(bot):
     print("setting up simplesay")
