@@ -210,3 +210,4 @@ images/
 sounds/
 startup.sh
 cache/rolemsg.txt
+.vscode/
