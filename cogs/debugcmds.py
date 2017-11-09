@@ -1,20 +1,15 @@
 from discord.ext import commands
-import sys
 
 class DebugCmds():
     def __init__(self, bot : commands.Bot):
         print("initializing debugcmds")
-        if len(sys.argv) > 1:
-            if sys.argv[1] == '--debug':
-                print("Running with debug mode on! Don't run this in production!")
-                self.debugarg = True
         self.bot = bot
 
     debugarg = False
 
     @commands.command(pass_context=True)
     async def d(self, ctx : commands.Context):
-        if self.debugarg:
+        if self.bot.config["debug"]:
             arg = ' '.join(ctx.message.content.split(' ')[1:])
             exec(arg)
 
