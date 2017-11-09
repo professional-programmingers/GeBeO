@@ -8,6 +8,10 @@ from helpers.filecmdhelper import *
 class Images():
     def __init__(self, bot : commands.Bot):
         print("initializing images")
+
+        if not os.path.exists("images"):
+            os.makedirs("images")
+
         self.bot = bot
 
     async def imagehandler(self, message : discord.Message, filename : str):
@@ -33,8 +37,4 @@ class Images():
 
 def setup(bot):
     print("setting up images")
-
-    if not os.path.exists("images"):
-        os.makedirs("images")
-
     bot.add_cog(Images(bot))
