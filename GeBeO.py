@@ -4,6 +4,10 @@ import sys
 startup_extensions = ["simplesay", "complexsay", "react", "timer", "images", "sounds", "rolemsg", "daydetector", "debugcmds"]
 
 
+async def on_command_error(exception, ctx):
+    print(type(exception))
+
+
 async def on_ready():
     print('Logged in as')
     print(bot.user.name)
@@ -23,6 +27,7 @@ if __name__ == '__main__':
             }  
 
     bot.add_listener(on_ready)  # Registers main's on_ready
+    bot.add_listener(on_command_error)
 
     if len(sys.argv) > 1:
 	# Flag checking.
