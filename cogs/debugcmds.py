@@ -8,12 +8,14 @@ class DebugCmds():
     debugarg = False
 
     @commands.command(pass_context=True)
+    @commands.has_permissions(administrator=True)
     async def d(self, ctx : commands.Context):
         if self.bot.config["debug"]:
             arg = ' '.join(ctx.message.content.split(' ')[1:])
             exec(arg)
 
     @commands.command()
+    @commands.has_permissions(administrator=True)
     async def headcount(self):
         await self.bot.say("here!")
 

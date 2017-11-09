@@ -22,10 +22,12 @@ class Images():
         await filegetter(self.bot, "images", ctx.message, self.imagehandler)
 
     @commands.command(pass_context=True)
+    @commands.has_permissions(administrator=True)
     async def iadd(self, ctx : commands.Context):
         await fileadder(self.bot, "images", ctx.message)
 
     @commands.command(pass_context=True)
+    @commands.has_permissions(administrator=True)
     async def irm(self, ctx : commands.Context):
         await fileremover(self.bot, "images", ctx.message)
 

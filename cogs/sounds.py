@@ -29,10 +29,12 @@ class Sounds():
         await filegetter(self.bot, "sounds", ctx.message, self.soundhandler)
 
     @commands.command(pass_context=True)
+    @commands.has_permissions(administrator=True)
     async def sadd(self, ctx : commands.Context):
         await fileadder(self.bot, "sounds", ctx.message)
 
     @commands.command(pass_context=True)
+    @commands.has_permissions(administrator=True)
     async def srm(self, ctx : commands.Context):
         await fileremover(self.bot, "sounds", ctx.message)
 

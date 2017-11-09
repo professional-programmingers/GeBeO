@@ -62,6 +62,7 @@ class RoleMsg():
         await self.update_role_msg_list()
 
     @commands.command(pass_context=True)
+    @commands.has_permissions(administrator=True)
     async def rolemsg(self, ctx : commands.Context):
         args_split = ctx.message.content.split(' ')[1:]
         await self.bot.delete_message(ctx.message)
