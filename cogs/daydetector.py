@@ -26,13 +26,14 @@ class DayDetector():
             print("Checking for day change!")
             print("Current time: " + str(current_time))
             print("Weekday = " + str(current_time.weekday()))
+
+            await self.christmas_countdown(current_time, tz)
+
             current_weekday = current_time.weekday()
             if current_weekday != last_weekday:
                 last_weekday = current_weekday
 
-                self.wednesday_detector(current_time)
-
-                self.christmas_countdown(current_time)
+                await self.wednesday_detector(current_time)
             await asyncio.sleep(60)
 
     wed_detector_channel = "370316975659810816"
@@ -46,7 +47,7 @@ class DayDetector():
             await asyncio.sleep(30)
             await self.bot.send_message(chan, self.wednesday_self_reply[random.randrange(len(self.wednesday_self_reply))])
 
-    async def christmas_countdown(self, current_time):
+    async def christmas_countdown(self, current_time, tz):
         christmas = datetime(current_time.year, 12, 25, tzinfo=tz)
         if christmas < current_time:
             christmas = datetime(current_time.year + 1, 12, 25, tzinfo=tz)
