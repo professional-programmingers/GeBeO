@@ -23,7 +23,10 @@ class Images():
 
     @commands.command(pass_context=True)
     async def i(self, ctx : commands.Context):
-        await filegetter(self.bot, "images", ctx, self.imagehandler)
+        try:
+            await filegetter(self.bot, "images", ctx, self.imagehandler)
+        except NoNameSpecifiedError:
+            await self.bot.say("No image specified! If you are looking for a list of available images, run `!ilist`")
 
     @commands.command(pass_context=True)
     @commands.has_permissions(administrator=True)
