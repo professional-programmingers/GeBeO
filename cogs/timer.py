@@ -34,6 +34,7 @@ class Timer():
 
     @commands.command(pass_context=True)
     async def timer(self, ctx : commands.Context):
+        await self.bot.type()
         if len(ctx.args_split) == 1:
             duration = int(ctx.args_split[0])
             self.bot.loop.create_task(self.timertask(duration, 100, ctx.message.channel))
