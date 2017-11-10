@@ -11,8 +11,11 @@ async def on_command(command, ctx):
 
 
 async def on_command_error(exception, ctx : commands.Context):
-    await bot.delete_message(ctx.message)
-    await bot.send_message(ctx.message.channel, "Sorry, you must be admin to use that command!")
+    if isinstance(exception, commands.errors.CommandInvokeError):
+        print(exception.original)
+    elif isinstance(exception, commands.errors.CheckFailure):
+        await bot.delete_message(ctx.message)
+        await bot.send_message(ctx.message.channel, "Sorry, you must be admin to use that command!")
 
 
 async def on_ready():
