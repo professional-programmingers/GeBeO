@@ -1,5 +1,6 @@
 from discord.ext import commands
 import time
+import asyncio
 
 class Timer():
     def __init__(self, bot : commands.Bot):
@@ -34,6 +35,7 @@ class Timer():
 
     @commands.command(pass_context=True)
     async def timer(self, ctx : commands.Context):
+        await asyncio.sleep(0.25)
         await self.bot.type()
         if len(ctx.args_split) == 1:
             duration = int(ctx.args_split[0])

@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import json
 import os
+import asyncio
 
 class RoleMsg():
     def __init__(self, bot : commands.Bot):
@@ -14,7 +15,8 @@ class RoleMsg():
             self.role_msg_list = json.loads(open("cache/rolemsg.txt", "r").read())
         else:
             self.role_msg_list = []
-            open("cache/rolemsg.txt", 'w+')
+            f = open("cache/rolemsg.txt", 'w+')
+            f.close()
 
     cache_counter = 0
     role_msg_list = None
@@ -31,6 +33,7 @@ class RoleMsg():
         self.role_msg_list[:] = [r for r in self.role_msg_list if r not in todelete]
         role_msg_cache = open("cache/rolemsg.txt", "w")
         role_msg_cache.write(json.dumps(self.role_msg_list))
+        role_msg_cache.close()
 
     async def on_reaction_add(self, reaction, user):
         print("reaction detected")
@@ -64,6 +67,7 @@ class RoleMsg():
     @commands.command(pass_context=True)
     @commands.has_permissions(administrator=True)
     async def rolemsg(self, ctx : commands.Context):
+        await asyncio.sleep(0.25)
         await self.bot.type()
         await self.bot.delete_message(ctx.message)
         if len(ctx.args_split) < 2:
@@ -86,6 +90,7 @@ class RoleMsg():
             self.role_msg_list.append(role_msg)
             role_msg_cache = open("cache/rolemsg.txt", "w")
             role_msg_cache.write(json.dumps(self.role_msg_list))
+            role_msg_cache.close()
 
 def setup(bot):
     print("setting up rolemsg")

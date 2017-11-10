@@ -4,6 +4,7 @@ import os
 import requests
 import glob
 from helpers.filecmdhelper import *
+import asyncio
 
 class Images():
     def __init__(self, bot : commands.Bot):
@@ -19,10 +20,12 @@ class Images():
 
     @commands.command()
     async def ilist(self):
+        await asyncio.sleep(0.25)
         await filelister(self.bot, "images")
 
     @commands.command(pass_context=True)
     async def i(self, ctx : commands.Context):
+        await asyncio.sleep(0.25)
         await self.bot.type()
         try:
             await filegetter(self.bot, "images", ctx, self.imagehandler)
@@ -32,12 +35,14 @@ class Images():
     @commands.command(pass_context=True)
     @commands.has_permissions(administrator=True)
     async def iadd(self, ctx : commands.Context):
+        await asyncio.sleep(0.25)
         await self.bot.type()
         await fileadder(self.bot, "images", ctx)
 
     @commands.command(pass_context=True)
     @commands.has_permissions(administrator=True)
     async def irm(self, ctx : commands.Context):
+        await asyncio.sleep(0.25)
         await self.bot.type()
         await fileremover(self.bot, "images", ctx)
 

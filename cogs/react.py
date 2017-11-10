@@ -1,5 +1,6 @@
 from discord.ext import commands
 import emojitable
+import asyncio
 
 class React():
     def __init__(self, bot : commands.Bot):
@@ -18,6 +19,7 @@ class React():
 
     @commands.command(pass_context=True)
     async def react(self, ctx : commands.Context):
+        await asyncio.sleep(0.25)
         await self.bot.type()
         last_message = []
         async for i in self.bot.logs_from(ctx.message.channel, limit=2):
