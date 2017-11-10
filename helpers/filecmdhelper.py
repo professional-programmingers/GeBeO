@@ -3,6 +3,9 @@ import glob
 import requests
 import discord
 
+class NoNameSpecifiedError(Exception):
+    """No File Name Specified"""
+
 async def filelister(bot, dir : str):
     listoffiles = sorted(os.listdir(dir))
     listresponse = ""
@@ -19,6 +22,8 @@ async def filegetter(bot, dir : str, ctx, handler):
             if f.split(".")[0] == ctx.args_split[0].lower():
                 await handler(ctx.message, dir + "/" + f)
                 break
+    else:
+        raise NoNameSpecifiedError("No File Name Specified")
 
 async def fileadder(bot, dir : str, ctx):
     if len(ctx.message.attachments) == 0:
