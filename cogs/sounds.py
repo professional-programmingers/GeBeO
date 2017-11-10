@@ -30,7 +30,10 @@ class Sounds():
 
     @commands.command(pass_context=True)
     async def s(self, ctx : commands.Context):
-        await filegetter(self.bot, "sounds", ctx, self.soundhandler)
+        try:
+            await filegetter(self.bot, "sounds", ctx, self.soundhandler)
+        except NoNameSpecifiedError:
+            await self.bot.say("No sound specified! If you are looking for a list of available sounds, run `!slist`")
 
     @commands.command(pass_context=True)
     @commands.has_permissions(administrator=True)
