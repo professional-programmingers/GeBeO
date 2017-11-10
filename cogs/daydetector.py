@@ -35,7 +35,7 @@ class DayDetector():
                 self.christmas_countdown(current_time)
             await asyncio.sleep(60)
 
-    wed_detector_channel = "167319706863140864"
+    wed_detector_channel = "370316975659810816"
 
     async def wednesday_detector(self, current_time):
         if current_time.weekday() == 2:
