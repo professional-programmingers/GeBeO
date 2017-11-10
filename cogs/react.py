@@ -10,12 +10,17 @@ class React():
     async def reacthelper(self, text, message):
         space_counter = 0
         for char in text:
+            found = False
             if char == ' ':
-                emoji = emojitable.table[char][space_counter]
-                space_counter += 1
+                if space_counter < len(emojitable.table[char]):
+                    emoji = emojitable.table[char][space_counter]
+                    space_counter += 1
+                    found = True
             else:
                 emoji = emojitable.table[char]
-            await self.bot.add_reaction(message, emoji)
+                found = True
+            if found:
+                await self.bot.add_reaction(message, emoji)
 
     @commands.command(pass_context=True)
     async def react(self, ctx : commands.Context):
