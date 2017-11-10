@@ -23,17 +23,17 @@ class Images():
 
     @commands.command(pass_context=True)
     async def i(self, ctx : commands.Context):
-        await filegetter(self.bot, "images", ctx.message, self.imagehandler)
+        await filegetter(self.bot, "images", ctx, self.imagehandler)
 
     @commands.command(pass_context=True)
     @commands.has_permissions(administrator=True)
     async def iadd(self, ctx : commands.Context):
-        await fileadder(self.bot, "images", ctx.message)
+        await fileadder(self.bot, "images", ctx)
 
     @commands.command(pass_context=True)
     @commands.has_permissions(administrator=True)
     async def irm(self, ctx : commands.Context):
-        await fileremover(self.bot, "images", ctx.message)
+        await fileremover(self.bot, "images", ctx)
 
 def setup(bot):
     print("setting up images")

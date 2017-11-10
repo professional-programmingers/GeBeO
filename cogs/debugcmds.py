@@ -11,8 +11,7 @@ class DebugCmds():
     @commands.has_permissions(administrator=True)
     async def d(self, ctx : commands.Context):
         if self.bot.config["debug"]:
-            arg = ' '.join(ctx.message.content.split(' ')[1:])
-            exec(arg)
+            exec(ctx.arg)
 
     @commands.command()
     @commands.has_permissions(administrator=True)

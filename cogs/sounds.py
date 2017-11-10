@@ -30,17 +30,17 @@ class Sounds():
 
     @commands.command(pass_context=True)
     async def s(self, ctx : commands.Context):
-        await filegetter(self.bot, "sounds", ctx.message, self.soundhandler)
+        await filegetter(self.bot, "sounds", ctx, self.soundhandler)
 
     @commands.command(pass_context=True)
     @commands.has_permissions(administrator=True)
     async def sadd(self, ctx : commands.Context):
-        await fileadder(self.bot, "sounds", ctx.message)
+        await fileadder(self.bot, "sounds", ctx)
 
     @commands.command(pass_context=True)
     @commands.has_permissions(administrator=True)
     async def srm(self, ctx : commands.Context):
-        await fileremover(self.bot, "sounds", ctx.message)
+        await fileremover(self.bot, "sounds", ctx)
 
     @commands.command(pass_context=True)
     async def sstop(self, ctx : commands.Context):
@@ -53,13 +53,12 @@ class Sounds():
 
     @commands.command(pass_context=True)
     async def yt(self, ctx : commands.Context):
-        arg = ' '.join(ctx.message.content.split(' ')[1:])
         vchan = ctx.message.author.voice.voice_channel
         if vchan == None:
             await self.bot.say("You're not in a voice channel!")
         else:
             voice = await self.bot.join_voice_channel(vchan)
-            player = await voice.create_ytdl_player(arg, after=self.after_sound_clip)
+            player = await voice.create_ytdl_player(ctx.arg, after=self.after_sound_clip)
             player.vc = voice
             player.start()
 

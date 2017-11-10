@@ -34,13 +34,12 @@ class Timer():
 
     @commands.command(pass_context=True)
     async def timer(self, ctx : commands.Context):
-        args_split = ctx.message.content.split(' ')[1:]
-        if len(args_split) == 1:
-            duration = int(args_split[0])
+        if len(ctx.args_split) == 1:
+            duration = int(ctx.args_split[0])
             self.bot.loop.create_task(self.timertask(duration, 100, ctx.message.channel))
-        elif len(args_split) == 2:
-            duration = int(args_split[0])
-            length = int(args_split[1])
+        elif len(ctx.args_split) == 2:
+            duration = int(ctx.args_split[0])
+            length = int(ctx.args_split[1])
             self.bot.loop.create_task(self.timertask(duration, length, ctx.message.channel))
 
 
