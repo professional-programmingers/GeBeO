@@ -47,16 +47,14 @@ class ComplexSay():
 
     @commands.command(pass_context=True)
     async def vote(self, ctx : commands.Context):
-        arg = ' '.join(ctx.message.content.split(' ')[1:])
         await self.bot.delete_message(ctx.message)
-        votekick_msg = await self.bot.say(arg)
+        votekick_msg = await self.bot.say(ctx.arg)
         await self.bot.add_reaction(votekick_msg, "✅")
         await self.bot.add_reaction(votekick_msg, "❎")
 
     @commands.command(pass_context=True)
     async def say(self, ctx : commands.Context):
-        arg = ' '.join(ctx.message.content.split(' ')[1:])
-        await self.bot.say(arg)
+        await self.bot.say(ctx.arg)
         await self.bot.delete_message(ctx.message)
 
 def setup(bot):

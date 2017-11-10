@@ -64,25 +64,24 @@ class RoleMsg():
     @commands.command(pass_context=True)
     @commands.has_permissions(administrator=True)
     async def rolemsg(self, ctx : commands.Context):
-        args_split = ctx.message.content.split(' ')[1:]
         await self.bot.delete_message(ctx.message)
-        if len(args_split) < 2:
+        if len(ctx.args_split) < 2:
             await self.bot.say("Wrong")
         else:
             role = None
-            print(args_split[-1])
+            print(ctx.args_split[-1])
             for r in ctx.message.server.roles:
-                if r.name == args_split[-1]:
+                if r.name == ctx.args_split[-1]:
                     role = r
             if role is None:
                 await self.bot.say("Can't find that role")
                 return
-            sent_msg = await self.bot.say(" ".join(args_split[0:-1]))
+            sent_msg = await self.bot.say(" ".join(ctx.args_split[0:-1]))
             await self.bot.add_reaction(sent_msg, "✅")
             role_msg = {}
             role_msg["msg_id"] = sent_msg.id
             role_msg["msg_chan_id"] = sent_msg.channel.id
-            role_msg["role_name"] = args_split[-1]
+            role_msg["role_name"] = ctx.args_split[-1]
             self.role_msg_list.append(role_msg)
             role_msg_cache = open("cache/rolemsg.txt", "w")
             role_msg_cache.write(json.dumps(self.role_msg_list))

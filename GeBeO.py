@@ -4,6 +4,12 @@ import sys
 startup_extensions = ["simplesay", "complexsay", "react", "timer", "images", "sounds", "rolemsg", "daydetector", "debugcmds"]
 
 
+async def on_command(command, ctx):
+    print(ctx.message.author.nick + ": " + ctx.message.content)
+    ctx.args_split = ctx.message.content.split(' ')[1:]
+    ctx.arg = ' '.join(ctx.args_split)
+
+
 async def on_command_error(exception, ctx : commands.Context):
     await bot.delete_message(ctx.message)
     await bot.send_message(ctx.message.channel, "Sorry, you must be admin to use that command!")
@@ -29,6 +35,7 @@ if __name__ == '__main__':
 
     bot.add_listener(on_ready)  # Registers main's on_ready
     bot.add_listener(on_command_error)
+    bot.add_listener(on_command)
 
     if len(sys.argv) > 1:
 	# Flag checking.
