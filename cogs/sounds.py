@@ -30,6 +30,7 @@ class Sounds():
 
     @commands.command(pass_context=True)
     async def s(self, ctx : commands.Context):
+        await self.bot.type()
         try:
             await filegetter(self.bot, "sounds", ctx, self.soundhandler)
         except NoNameSpecifiedError:
@@ -38,11 +39,13 @@ class Sounds():
     @commands.command(pass_context=True)
     @commands.has_permissions(administrator=True)
     async def sadd(self, ctx : commands.Context):
+        await self.bot.type()
         await fileadder(self.bot, "sounds", ctx)
 
     @commands.command(pass_context=True)
     @commands.has_permissions(administrator=True)
     async def srm(self, ctx : commands.Context):
+        await self.bot.type()
         await fileremover(self.bot, "sounds", ctx)
 
     @commands.command(pass_context=True)
@@ -56,6 +59,7 @@ class Sounds():
 
     @commands.command(pass_context=True)
     async def yt(self, ctx : commands.Context):
+        await self.bot.type()
         vchan = ctx.message.author.voice.voice_channel
         if vchan == None:
             await self.bot.say("You're not in a voice channel!")

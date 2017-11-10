@@ -64,6 +64,7 @@ class RoleMsg():
     @commands.command(pass_context=True)
     @commands.has_permissions(administrator=True)
     async def rolemsg(self, ctx : commands.Context):
+        await self.bot.type()
         await self.bot.delete_message(ctx.message)
         if len(ctx.args_split) < 2:
             await self.bot.say("Wrong")

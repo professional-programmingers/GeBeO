@@ -18,6 +18,7 @@ class React():
 
     @commands.command(pass_context=True)
     async def react(self, ctx : commands.Context):
+        await self.bot.type()
         last_message = []
         async for i in self.bot.logs_from(ctx.message.channel, limit=2):
             last_message.append(i)

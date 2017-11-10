@@ -10,6 +10,7 @@ class DebugCmds():
     @commands.command(pass_context=True)
     @commands.has_permissions(administrator=True)
     async def d(self, ctx : commands.Context):
+        await self.bot.type()
         if self.bot.config["debug"]:
             exec(ctx.arg)
 
