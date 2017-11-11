@@ -11,21 +11,41 @@ class Sounds():
             os.makedirs("sounds")
 
         self.bot = bot
-        self.currentVoiceChan = None
 
-    currentVoiceChan = None
+    soundQueue = asyncio.Queue()
+    currentVoiceClient = None
+
+    async def play_next_sound(self):
+        print("playing next sound")
+        if not self.soundQueue.empty():
+            print("queue isn't empty")
+            soundItem = await self.soundQueue.get()
+            print(soundItem)
+            if self.currentVoiceClient == None:
+                print("making new voiceclient")
+                self.currentVoiceClient = await soundItem[0].connect()
+            if not soundItem[0].id == self.currentVoiceClient.channel.id:
+                print("connecting bot to different server")
+                await self.currentVoiceClient.move_to(soundItem[0])
+            self.currentVoiceClient.play(discord.FFmpegPCMAudio(soundItem[1]), after=self.after_sound_clip)
+        else:
+            await self.currentVoiceClient.disconnect()
+            self.currentVoiceClient = None
 
     def after_sound_clip(self, error):
-        self.bot.loop.create_task(self.currentVoiceChan.disconnect())
-        self.currentVoiceChan = None
+        print("asdf")
+        self.bot.loop.create_task(self.play_next_sound())
+        print("woo")
 
     async def soundhandler(self, ctx, filename : str):
         vchan = ctx.message.author.voice.channel
         if vchan == None:
             await ctx.send("You're not in a voice channel!")
         else:
-            self.currentVoiceChan = await vchan.connect()
-            self.currentVoiceChan.play(discord.FFmpegPCMAudio(filename), after=self.after_sound_clip)
+            await self.soundQueue.put((vchan, filename))
+            print(self.soundQueue)
+            if self.currentVoiceClient == None:
+                await self.play_next_sound()
 
     @commands.command()
     async def slist(self, ctx):
@@ -33,14 +53,10 @@ class Sounds():
 
     @commands.command()
     async def s(self, ctx):
-        await ctx.trigger_typing()
-        if self.currentVoiceChan != None:
-            ctx.send("The bot is in use, wait your turn!")
-        else:
-            try:
-                await filegetter(ctx, "sounds", self.soundhandler)
-            except NoNameSpecifiedError:
-                await ctx.send("No sound specified! If you are looking for a list of available sounds, run `!slist`")
+        try:
+            await filegetter(ctx, "sounds", self.soundhandler)
+        except NoNameSpecifiedError:
+            await ctx.send("No sound specified! If you are looking for a list of available sounds, run `!slist`")
 
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -55,13 +71,19 @@ class Sounds():
         await fileremover(ctx, "sounds")
 
     @commands.command()
-    async def sstop(self, ctx):
+    async def sskip(self, ctx):
         for vc in self.bot.voice_clients:
             for m in vc.channel.members:
                 if ctx.message.author == m:
-                    await vc.disconnect()
+                    await vc.stop()
                     return
         await ctx.send("You're not in a voice chat that the bot is in!")
+
+    @commands.command()
+    async def sclear(self, ctx):
+        self.soundQueue = asyncio.Queue()
+        await self.currentVoiceClient.disconnect()
+        self.currentVoiceClient = None
 
     # @commands.command()
     # async def yt(self, ctx):
