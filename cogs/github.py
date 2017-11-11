@@ -39,7 +39,7 @@ class Github():
         """
         await asyncio.sleep(0.25)
 
-        if len(ctx.args_split) < 2:
+        if len(ctx.args_split) < 1:
             await self.bot.say("Invalid number of arguments")
             return
 
