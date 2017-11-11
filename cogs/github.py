@@ -31,31 +31,41 @@ class Github():
 
     @commands.command(pass_context=True)
     @commands.has_permissions(administrator=True)
-    async def register(self, ctx : commands.Context):
+    async def gitreg(self, ctx : commands.Context):
         """ 
         Registers a channel to listen to.
         USAGE: !register repo owner/repo
             In the future maybe different types of registration.
         """
         await asyncio.sleep(0.25)
-        register_info = ()
 
         if len(ctx.arg) < 2:
             await self.bot.say("Invalid number of arguments")
             return
 
-        if ctx.args_split[0] == "repo":
-            register_info = ("repo", ctx.args_split[1])
-
         if ctx.message.channel.id in self.registered_channels:
             await self.bot.say("This channel is already registered!")
         else:
             # Register channel.
-            self.registered_channels[ctx.message.channel.id] = register_info
+            self.registered_channels[ctx.message.channel.id] = ctx.args_split[0].strip('/')
             f = open(self.file_name, "w+")
             f.write(json.dumps(self.registered_channels))
             f.close()
             await self.bot.say("Successfully registered!")
+
+
+    @commands.command(pass_context=True)
+    @commands.has_permissions(administrator=True)
+    async def gitrm(self, ctx : commands.Context):
+        """ Remove the channel from the registered channel list. """
+        if ctx.message.channel.id in self.registered_channels:
+            del self.registered_channels[ctx.message.channel.id]
+            f = open(self.file_name, "w+")
+            f.write(json.dumps(self.registered_channels))
+            f.close()
+            await self.bot.say("Channel removed!")
+        else:
+            await self.bot.say("This channel is not registered!")
 
 
     async def on_message(self, message):
@@ -66,26 +76,24 @@ class Github():
 
         if message.channel.id in self.registered_channels:
             # Get info on the current channel.
-            channel_type = self.registered_channels[message.channel.id][0]
-            channel_info = self.registered_channels[message.channel.id][1]
+            channel_info = self.registered_channels[message.channel.id]
             issues_list = self.parse_issues(message)
             url_list = []  # URL list of issues to be printed to channel.
 
             if not issues_list:
                 return
 
-            if(channel_type == "repo"):
-                api_url = self.api_base + "repos/" + channel_info + "/issues"
-                payload = {"state" : "all", "sort" : "created"}
-                request_json = json.loads(requests.get(api_url, params=payload).text)
-                largest_issue = request_json[0]["number"]
-                for issue in issues_list:
-                    if issue > largest_issue:
-                        continue
-                    for issue_json in request_json:
-                        if issue == issue_json["number"]:
-                            url_list.append(issue_json["html_url"])
-                            break
+            api_url = self.api_base + "repos/" + channel_info + "/issues"
+            payload = {"state" : "all", "sort" : "created"}
+            request_json = json.loads(requests.get(api_url, params=payload).text)
+            largest_issue = request_json[0]["number"]
+            for issue in issues_list:
+                if issue > largest_issue:
+                    continue
+                for issue_json in request_json:
+                    if issue == issue_json["number"]:
+                        url_list.append(issue_json["html_url"])
+                        break
             # Concantenate the urls together to print them out.
             if url_list:
                 url_string = ""
