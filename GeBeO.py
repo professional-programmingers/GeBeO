@@ -1,7 +1,7 @@
 from discord.ext import commands
 import sys
 
-startup_extensions = ["timer", "sounds", "react", "simplesay", "debugcmds", "images", "daydetector", "complexsay", "rolemsg"]
+startup_extensions = ["simplesay", "complexsay", "react", "timer", "images", "sounds", "rolemsg", "daydetector", "debugcmds", "github"]
 
 
 class GeBeOContext(commands.Context):
