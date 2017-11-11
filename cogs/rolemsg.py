@@ -13,6 +13,12 @@ class RoleMsg():
             os.makedirs("cache")
         if os.path.isfile("cache/rolemsg.txt") and os.stat("cache/rolemsg.txt").st_size != 0:
             self.role_msg_list = json.loads(open("cache/rolemsg.txt", "r").read())
+            for rolemsg in self.role_msg_list:
+                if isinstance(rolemsg["msg_chan_id"], str):
+                    print("asdf")
+                    rolemsg["msg_chan_id"] = int(rolemsg["msg_chan_id"])
+                if isinstance(rolemsg["msg_id"], str):
+                    rolemsg["msg_id"] = int(rolemsg["msg_id"])
         else:
             self.role_msg_list = []
             f = open("cache/rolemsg.txt", 'w+')
@@ -26,8 +32,7 @@ class RoleMsg():
         for rolemsg in self.role_msg_list:
             rolemsg_channel = self.bot.get_channel(rolemsg["msg_chan_id"])
             try:
-                rolemsg_message = await self.bot.get_message(rolemsg_channel, rolemsg["msg_id"])
-                self.bot.messages.append(rolemsg_message)
+                await rolemsg_channel.get_message(rolemsg["msg_id"])
             except discord.NotFound:
                 todelete.append(rolemsg)
         self.role_msg_list[:] = [r for r in self.role_msg_list if r not in todelete]
@@ -35,54 +40,52 @@ class RoleMsg():
         role_msg_cache.write(json.dumps(self.role_msg_list))
         role_msg_cache.close()
 
-    async def on_reaction_add(self, reaction, user):
-        print("reaction detected")
+    async def on_raw_reaction_add(self, emoji, message_id, channel_id, user_id):
         for rmsg in self.role_msg_list:
-            if reaction.message.id == rmsg["msg_id"]:
-                if reaction.emoji == "✅":
-                    for r in reaction.message.server.roles:
+            if message_id == rmsg["msg_id"]:
+                channel = self.bot.get_channel(channel_id)
+                message = channel.get_message(message_id)
+                member = channel.guild.get_member(user_id)
+                if emoji.name == "✅":
+                    for r in channel.guild.roles:
                         if r.name == rmsg["role_name"]:
-                            await self.bot.add_roles(user, r)
+                            await member.add_roles(r)
                             return
                 else:
-                    await self.bot.remove_reaction(reaction.message, reaction.emoji, user)
+                    await message.remove_reaction("✅", member)
 
-    async def on_reaction_remove(self, reaction, user):
+    async def on_raw_reaction_remove(self, emoji, message_id, channel_id, user_id):
         for rmsg in self.role_msg_list:
-            if reaction.message.id == rmsg["msg_id"]:
-                for r in reaction.message.server.roles:
+            if message_id == rmsg["msg_id"]:
+                channel = self.bot.get_channel(channel_id)
+                for r in channel.guild.roles:
                     if r.name == rmsg["role_name"]:
-                        await self.bot.remove_roles(user, r)
+                        member = channel.guild.get_member(user_id)
+                        await member.remove_roles(r)
                         return
-
-    async def on_message(self, message):
-        self.cache_counter += 1
-        if self.cache_counter > 4500:
-            self.cache_counter = 0
-            await self.update_role_msg_list()
 
     async def on_ready(self):
         await self.update_role_msg_list()
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.has_permissions(administrator=True)
-    async def rolemsg(self, ctx : commands.Context):
-        await asyncio.sleep(0.25)
-        await self.bot.type()
-        await self.bot.delete_message(ctx.message)
+    async def rolemsg(self, ctx):
+        await ctx.trigger_typing()
+        await ctx.message.delete()
+        print("checkpoint1")
         if len(ctx.args_split) < 2:
-            await self.bot.say("Wrong")
+            await ctx.send("Wrong")
         else:
             role = None
             print(ctx.args_split[-1])
-            for r in ctx.message.server.roles:
+            for r in ctx.message.guild.roles:
                 if r.name == ctx.args_split[-1]:
                     role = r
             if role is None:
-                await self.bot.say("Can't find that role")
+                await ctx.send("Can't find that role")
                 return
-            sent_msg = await self.bot.say(" ".join(ctx.args_split[0:-1]))
-            await self.bot.add_reaction(sent_msg, "✅")
+            sent_msg = await ctx.send(" ".join(ctx.args_split[0:-1]))
+            await sent_msg.add_reaction("✅")
             role_msg = {}
             role_msg["msg_id"] = sent_msg.id
             role_msg["msg_chan_id"] = sent_msg.channel.id

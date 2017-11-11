@@ -9,28 +9,25 @@ class SimpleSay():
 
     async def nickname_message(self, ctx : commands.Context, nick : str, msg : str):
         await self.nickname_lock.acquire()
-        nickname = ctx.message.server.me.nick
-        await self.bot.delete_message(ctx.message)
-        await self.bot.change_nickname(ctx.message.server.me, nick)
-        await self.bot.say(msg)
-        await self.bot.change_nickname(ctx.message.server.me, nickname)
+        nickname = ctx.guild.me.display_name
+        await ctx.message.delete()
+        await ctx.guild.me.edit(nick=nick)
+        await ctx.send(msg)
+        await ctx.guild.me.edit(nick=nickname)
         self.nickname_lock.release()
 
-    @commands.command(pass_context=True)
+    @commands.command()
     async def ayy(self, ctx : commands.Context):
-        await asyncio.sleep(0.25)
         await self.nickname_message(ctx, "ayy", "lmao")
 
-    @commands.command(aliases=["me2"], pass_context=True)
+    @commands.command(aliases=["me2"])
     async def metoo(self, ctx : commands.Context):
-        await asyncio.sleep(0.25)
         await self.nickname_message(ctx, "Me Too", "Thanks")
 
-    @commands.command(pass_context=True)
+    @commands.command()
     async def blowme(self, ctx : commands.Context):
-        await asyncio.sleep(0.25)
-        await self.bot.delete_message(ctx.message)
-        await self.bot.say("*sucks " + ctx.message.author.nick + " off*")
+        await ctx.message.delete()
+        await ctx.send("*sucks " + ctx.message.author.display_name + " off*")
 
 def setup(bot):
     print("setting up simplesay")

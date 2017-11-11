@@ -9,35 +9,32 @@ class ComplexSay():
         print("initializing complexsay")
         self.bot = bot
 
-    @commands.command(pass_context=True)
-    async def cowsay(self, ctx : commands.Context):
-        await asyncio.sleep(0.25)
-        await self.bot.delete_message(ctx.message)
-        messages = self.bot.logs_from(ctx.message.channel, limit=1, before=ctx.message)
+    @commands.command()
+    async def cowsay(self, ctx):
+        await ctx.message.delete()
+        messages = ctx.channel.history(limit=1, before=ctx.message)
         async for message_to_edit in messages:
             to_edit = message_to_edit.content
             random_cow = cow.milk_random_cow(to_edit)
             edited = '```' + re.sub('```', '', random_cow) + '```'
-            await self.bot.say(edited)
+            await ctx.send(edited)
 
-    @commands.command(pass_context=True)
-    async def rt(self, ctx : commands.Context):
-        await asyncio.sleep(0.25)
-        await self.bot.delete_message(ctx.message)
-        messages = self.bot.logs_from(ctx.message.channel, limit=1, before=ctx.message)
+    @commands.command()
+    async def rt(self, ctx):
+        await ctx.message.delete()
+        messages = ctx.channel.history(limit=1, before=ctx.message)
         async for message_to_edit in messages:
             to_edit = message_to_edit.content
             edited = ''
             for char in to_edit:
                 if randint(0, 1) == 0:
                     edited += char.upper()
-            await self.bot.say(edited)
+            await ctx.send(edited)
 
-    @commands.command(pass_context=True)
-    async def mock(self, ctx : commands.Context):
-        await asyncio.sleep(0.25)
-        await self.bot.delete_message(ctx.message)
-        messages = self.bot.logs_from(ctx.message.channel, limit=1, before=ctx.message)
+    @commands.command()
+    async def mock(self, ctx):
+        await ctx.message.delete()
+        messages = ctx.channel.history(limit=1, before=ctx.message)
         async for message_to_edit in messages:
             to_edit = message_to_edit.content
             edited = ''
@@ -46,22 +43,20 @@ class ComplexSay():
                     edited += char.upper()
                 else:
                     edited += char.lower()
-            await self.bot.say(edited)
+            await ctx.send(edited)
 
 
-    @commands.command(pass_context=True)
-    async def vote(self, ctx : commands.Context):
-        await asyncio.sleep(0.25)
-        await self.bot.delete_message(ctx.message)
-        votekick_msg = await self.bot.say(ctx.arg)
-        await self.bot.add_reaction(votekick_msg, "✅")
-        await self.bot.add_reaction(votekick_msg, "❎")
+    @commands.command()
+    async def vote(self, ctx):
+        await ctx.message.delete()
+        votekick_msg = await ctx.send(ctx.arg)
+        await votekick_msg.add_reaction("✅")
+        await votekick_msg.add_reaction("❎")
 
-    @commands.command(pass_context=True)
-    async def say(self, ctx : commands.Context):
-        await asyncio.sleep(0.25)
-        await self.bot.say(ctx.arg)
-        await self.bot.delete_message(ctx.message)
+    @commands.command()
+    async def say(self, ctx):
+        await ctx.send(ctx.arg)
+        await ctx.message.delete()
 
 def setup(bot):
     print("setting up complexsay")

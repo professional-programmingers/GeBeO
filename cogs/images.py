@@ -15,36 +15,33 @@ class Images():
 
         self.bot = bot
 
-    async def imagehandler(self, message : discord.Message, filename : str):
-        await self.bot.upload(filename)
+    async def imagehandler(self, ctx, filename : str):
+        print(filename)
+        await ctx.channel.send(file=discord.File(filename, filename.split("/")[-1]))
 
     @commands.command()
-    async def ilist(self):
-        await asyncio.sleep(0.25)
-        await filelister(self.bot, "images")
+    async def ilist(self, ctx):
+        await filelister(ctx, "images")
 
-    @commands.command(pass_context=True)
-    async def i(self, ctx : commands.Context):
-        await asyncio.sleep(0.25)
-        await self.bot.type()
+    @commands.command()
+    async def i(self, ctx):
+        await ctx.trigger_typing()
         try:
-            await filegetter(self.bot, "images", ctx, self.imagehandler)
+            await filegetter(ctx, "images", self.imagehandler)
         except NoNameSpecifiedError:
-            await self.bot.say("No image specified! If you are looking for a list of available images, run `!ilist`")
+            await ctx.send("No image specified! If you are looking for a list of available images, run `!ilist`")
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.has_permissions(administrator=True)
-    async def iadd(self, ctx : commands.Context):
-        await asyncio.sleep(0.25)
-        await self.bot.type()
-        await fileadder(self.bot, "images", ctx)
+    async def iadd(self, ctx):
+        await ctx.trigger_typing()
+        await fileadder(ctx, "images")
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.has_permissions(administrator=True)
-    async def irm(self, ctx : commands.Context):
-        await asyncio.sleep(0.25)
-        await self.bot.type()
-        await fileremover(self.bot, "images", ctx)
+    async def irm(self, ctx):
+        await ctx.trigger_typing()
+        await fileremover(ctx, "images")
 
 def setup(bot):
     print("setting up images")

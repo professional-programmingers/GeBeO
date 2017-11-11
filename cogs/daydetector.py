@@ -43,9 +43,9 @@ class DayDetector():
             my_dudes = "<:MyDudes:304341572168712193> "
             chan = self.bot.get_channel(self.wed_detector_channel)
             msg = my_dudes * 3 + "It is Wednesday my dudes" + my_dudes * 3
-            await self.bot.send_message(chan, msg)
+            await chan.send(msg)
             await asyncio.sleep(30)
-            await self.bot.send_message(chan, self.wednesday_self_reply[random.randrange(len(self.wednesday_self_reply))])
+            await chan.send(self.wednesday_self_reply[random.randrange(len(self.wednesday_self_reply))])
 
     async def christmas_countdown(self, current_time, tz):
         christmas = datetime(current_time.year, 12, 25, tzinfo=tz)

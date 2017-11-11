@@ -13,7 +13,7 @@ class Timer():
         counter = 1
         text = "```diff\n-  0 |" + " "*length + "| " + str(duration) + "\n```"
         # Send message
-        message = await self.bot.send_message(channel, text)
+        message = await channel.send(text)
         while counter <= duration:
             time.sleep(1)
             # Coloring
@@ -29,14 +29,13 @@ class Timer():
             progress = int(round(((float(counter)/duration*length))))
             strdur = str(duration)
             text += "-"*progress + " "*(length-progress) + "| " + strdur + "\n```"
-            await self.bot.edit_message(message, text)
+            await message.edit(content=text)
             counter += 1
-        await self.bot.add_reaction(message, u"\U000023F0")
+        await message.add_reaction(u"\U000023F0")
 
-    @commands.command(pass_context=True)
-    async def timer(self, ctx : commands.Context):
-        await asyncio.sleep(0.25)
-        await self.bot.type()
+    @commands.command()
+    async def timer(self, ctx):
+        await ctx.trigger_typing()
         if len(ctx.args_split) == 1:
             duration = int(ctx.args_split[0])
             self.bot.loop.create_task(self.timertask(duration, 100, ctx.message.channel))
