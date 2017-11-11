@@ -34,12 +34,12 @@ class Github():
     async def gitreg(self, ctx : commands.Context):
         """ 
         Registers a channel to listen to.
-        USAGE: !register repo owner/repo
+        USAGE: !gitreg owner/repo
             In the future maybe different types of registration.
         """
         await asyncio.sleep(0.25)
 
-        if len(ctx.arg) < 2:
+        if len(ctx.args_split) < 2:
             await self.bot.say("Invalid number of arguments")
             return
 
