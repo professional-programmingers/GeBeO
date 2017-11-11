@@ -209,5 +209,5 @@ run.sh
 images/
 sounds/
 startup.sh
-cache/rolemsg.txt
+cache/
 .vscode/

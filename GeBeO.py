@@ -1,7 +1,7 @@
 from discord.ext import commands
 import sys
 
-startup_extensions = ["simplesay", "complexsay", "react", "timer", "images", "sounds", "rolemsg", "daydetector", "debugcmds"]
+startup_extensions = ["simplesay", "complexsay", "react", "timer", "images", "sounds", "rolemsg", "daydetector", "debugcmds", "github"]
 
 
 async def on_command(command, ctx):
