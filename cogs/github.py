@@ -57,7 +57,10 @@ class Github():
     @commands.command(pass_context=True)
     @commands.has_permissions(administrator=True)
     async def gitrm(self, ctx : commands.Context):
-        """ Remove the channel from the registered channel list. """
+        """ 
+        Remove the channel from the registered channel list.
+        USAGE: !gitrm
+        """
         if ctx.message.channel.id in self.registered_channels:
             del self.registered_channels[ctx.message.channel.id]
             f = open(self.file_name, "w+")
