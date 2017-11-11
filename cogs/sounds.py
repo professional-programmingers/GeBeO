@@ -18,7 +18,6 @@ class Sounds():
     async def play_next_sound(self):
         if not self.soundQueue.empty():
             soundItem = await self.soundQueue.get()
-            print(soundItem)
             if self.currentVoiceClient == None:
                 self.currentVoiceClient = await soundItem[0].connect()
             if not soundItem[0].id == self.currentVoiceClient.channel.id:
