@@ -40,11 +40,11 @@ class Github():
             await ctx.send("Invalid number of arguments")
             return
 
-        if ctx.message.channel.id in self.registered_channels:
+        if str(ctx.message.channel.id) in self.registered_channels:
             await ctx.send("This channel is already registered!")
         else:
             # Register channel.
-            self.registered_channels[ctx.message.channel.id] = ctx.args_split[0].strip('/')
+            self.registered_channels[str(ctx.message.channel.id)] = ctx.args_split[0].strip('/')
             f = open(self.file_name, "w+")
             f.write(json.dumps(self.registered_channels))
             f.close()
@@ -58,8 +58,8 @@ class Github():
         Remove the channel from the registered channel list.
         USAGE: !gitrm
         """
-        if ctx.message.channel.id in self.registered_channels:
-            del self.registered_channels[ctx.message.channel.id]
+        if str(ctx.message.channel.id) in self.registered_channels:
+            del self.registered_channels[str(ctx.message.channel.id)]
             f = open(self.file_name, "w+")
             f.write(json.dumps(self.registered_channels))
             f.close()
@@ -74,9 +74,9 @@ class Github():
         Then print out the associated url for each issues to the channel.
         """
 
-        if message.channel.id in self.registered_channels:
+        if str(message.channel.id) in self.registered_channels:
             # Get info on the current channel.
-            channel_info = self.registered_channels[message.channel.id]
+            channel_info = self.registered_channels[str(message.channel.id)]
             issues_list = self.parse_issues(message)
             url_list = []  # URL list of issues to be printed to channel.
 
@@ -108,6 +108,9 @@ class Github():
         message_split = message.content.split(" ")
         issues_list = []
         for word in message_split:
+            #import pdb; pdb.set_trace()
+            if not word:
+                continue
             if word[0] == '#':
                 try:
                     # Make sure things behind # is a legit issue
