@@ -108,6 +108,8 @@ class Github():
         message_split = message.content.split(" ")
         issues_list = []
         for word in message_split:
+            if len(word) == 0:
+                continue
             if word[0] == '#':
                 try:
                     # Make sure things behind # is a legit issue
