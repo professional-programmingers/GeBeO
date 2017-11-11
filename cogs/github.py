@@ -28,47 +28,44 @@ class Github():
             f = open(self.file_name, "w+")
         f.close()
 
-
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.has_permissions(administrator=True)
-    async def gitreg(self, ctx : commands.Context):
+    async def gitreg(self, ctx):
         """ 
         Registers a channel to listen to.
         USAGE: !gitreg owner/repo
             In the future maybe different types of registration.
         """
-        await asyncio.sleep(0.25)
-
         if len(ctx.args_split) < 1:
-            await self.bot.say("Invalid number of arguments")
+            await ctx.send("Invalid number of arguments")
             return
 
-        if ctx.message.channel.id in self.registered_channels:
-            await self.bot.say("This channel is already registered!")
+        if str(ctx.message.channel.id) in self.registered_channels:
+            await ctx.send("This channel is already registered!")
         else:
             # Register channel.
-            self.registered_channels[ctx.message.channel.id] = ctx.args_split[0].strip('/')
+            self.registered_channels[str(ctx.message.channel.id)] = ctx.args_split[0].strip('/')
             f = open(self.file_name, "w+")
             f.write(json.dumps(self.registered_channels))
             f.close()
-            await self.bot.say("Successfully registered!")
+            await ctx.send("Successfully registered!")
 
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.has_permissions(administrator=True)
-    async def gitrm(self, ctx : commands.Context):
+    async def gitrm(self, ctx):
         """ 
         Remove the channel from the registered channel list.
         USAGE: !gitrm
         """
-        if ctx.message.channel.id in self.registered_channels:
-            del self.registered_channels[ctx.message.channel.id]
+        if str(ctx.message.channel.id) in self.registered_channels:
+            del self.registered_channels[str(ctx.message.channel.id)]
             f = open(self.file_name, "w+")
             f.write(json.dumps(self.registered_channels))
             f.close()
-            await self.bot.say("Channel removed!")
+            await ctx.send("Channel removed!")
         else:
-            await self.bot.say("This channel is not registered!")
+            await ctx.send("This channel is not registered!")
 
 
     async def on_message(self, message):
@@ -77,9 +74,9 @@ class Github():
         Then print out the associated url for each issues to the channel.
         """
 
-        if message.channel.id in self.registered_channels:
+        if str(message.channel.id) in self.registered_channels:
             # Get info on the current channel.
-            channel_info = self.registered_channels[message.channel.id]
+            channel_info = self.registered_channels[str(message.channel.id)]
             issues_list = self.parse_issues(message)
             url_list = []  # URL list of issues to be printed to channel.
 
@@ -103,7 +100,7 @@ class Github():
                 for url in url_list:
                     url_string += url + "\n"
                 _internal_channel = message.channel  # Holy shit discordpy
-                await self.bot.say(url_string)
+                await message.channel.send(url_string)
 
 
     def parse_issues(self, message):
@@ -111,6 +108,9 @@ class Github():
         message_split = message.content.split(" ")
         issues_list = []
         for word in message_split:
+            #import pdb; pdb.set_trace()
+            if not word:
+                continue
             if word[0] == '#':
                 try:
                     # Make sure things behind # is a legit issue

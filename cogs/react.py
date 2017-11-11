@@ -20,18 +20,17 @@ class React():
                 emoji = emojitable.table[char]
                 found = True
             if found:
-                await self.bot.add_reaction(message, emoji)
+                await message.add_reaction(emoji)
 
-    @commands.command(pass_context=True)
-    async def react(self, ctx : commands.Context):
-        await asyncio.sleep(0.25)
-        await self.bot.type()
+    @commands.command()
+    async def react(self, ctx):
+        await ctx.trigger_typing()
         last_message = []
-        async for i in self.bot.logs_from(ctx.message.channel, limit=2):
+        async for i in ctx.channel.history(limit=2):
             last_message.append(i)
         last_message = last_message[1]
         self.bot.loop.create_task(self.reacthelper(ctx.arg, last_message))
-        await self.bot.delete_message(ctx.message)
+        await ctx.message.delete()
 
 def setup(bot):
     print("setting up react")

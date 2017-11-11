@@ -8,19 +8,17 @@ class DebugCmds():
 
     debugarg = False
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.has_permissions(administrator=True)
-    async def d(self, ctx : commands.Context):
-        await asyncio.sleep(0.25)
-        await self.bot.type()
+    async def d(self, ctx):
+        await ctx.trigger_typing()
         if self.bot.config["debug"]:
             exec(ctx.arg)
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def headcount(self):
-        await asyncio.sleep(0.25)
-        await self.bot.say("here!")
+    async def headcount(self, ctx):
+        await ctx.send("here!")
 
 def setup(bot : commands.Bot):
     print("setting up debugcmds")
