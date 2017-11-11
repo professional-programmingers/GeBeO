@@ -23,7 +23,7 @@ class GeBeOBot(commands.Bot):
 
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.errors.CommandInvokeError):
-            print(error.original)
+            print(error.original.with_traceback())
         elif isinstance(error, commands.errors.MissingPermissions):
             await ctx.message.delete()
             await ctx.send("Sorry, you must be admin to use that command!")
