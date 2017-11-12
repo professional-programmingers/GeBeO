@@ -36,6 +36,7 @@ class Github():
         USAGE: !gitreg owner/repo
             In the future maybe different types of registration.
         """
+        await ctx.trigger_typing()
         if len(ctx.args_split) < 1:
             await ctx.send("Invalid number of arguments")
             return
@@ -58,6 +59,7 @@ class Github():
         Remove the channel from the registered channel list.
         USAGE: !gitrm
         """
+        await ctx.trigger_typing()
         if str(ctx.message.channel.id) in self.registered_channels:
             del self.registered_channels[str(ctx.message.channel.id)]
             f = open(self.file_name, "w+")

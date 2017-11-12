@@ -11,7 +11,6 @@ class DebugCmds():
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def d(self, ctx):
-        await ctx.trigger_typing()
         if self.bot.config["debug"]:
             exec(ctx.arg)
 

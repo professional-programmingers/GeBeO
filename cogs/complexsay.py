@@ -11,17 +11,19 @@ class ComplexSay():
 
     @commands.command()
     async def cowsay(self, ctx):
-        await ctx.message.delete()
+        await ctx.trigger_typing()
         messages = ctx.channel.history(limit=1, before=ctx.message)
         async for message_to_edit in messages:
             to_edit = message_to_edit.content
             random_cow = cow.milk_random_cow(to_edit)
             edited = '```' + re.sub('```', '', random_cow) + '```'
             await ctx.send(edited)
+        await ctx.message.delete()
+
 
     @commands.command()
     async def rt(self, ctx):
-        await ctx.message.delete()
+        await ctx.trigger_typing()
         messages = ctx.channel.history(limit=1, before=ctx.message)
         async for message_to_edit in messages:
             to_edit = message_to_edit.content
@@ -30,10 +32,11 @@ class ComplexSay():
                 if randint(0, 1) == 0:
                     edited += char.upper()
             await ctx.send(edited)
+        await ctx.message.delete()
 
     @commands.command()
     async def mock(self, ctx):
-        await ctx.message.delete()
+        await ctx.trigger_typing()
         messages = ctx.channel.history(limit=1, before=ctx.message)
         async for message_to_edit in messages:
             to_edit = message_to_edit.content
@@ -44,14 +47,15 @@ class ComplexSay():
                 else:
                     edited += char.lower()
             await ctx.send(edited)
+        await ctx.message.delete()
 
 
     @commands.command()
     async def vote(self, ctx):
-        await ctx.message.delete()
         votekick_msg = await ctx.send(ctx.arg)
         await votekick_msg.add_reaction("✅")
         await votekick_msg.add_reaction("❎")
+        await ctx.message.delete()
 
     @commands.command()
     async def say(self, ctx):
