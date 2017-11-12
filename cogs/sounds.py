@@ -37,15 +37,10 @@ class Sounds():
                     'prefer_ffmpeg': True
                 }
                 ydl = youtube_dl.YoutubeDL(opts)
-                print("pls")
-                print(soundItem[1])
                 func = functools.partial(ydl.extract_info, soundItem[1], download=False)
                 info = await self.bot.loop.run_in_executor(None, func)
-                print("wut")
                 download_url = info['url']
-                print("inb4 fails here")
                 self.currentVoiceClient.play(discord.FFmpegPCMAudio(download_url), after=self.after_sound_clip)
-                print("or here")
         else:
             await self.currentVoiceClient.disconnect()
             self.currentVoiceClient = None
@@ -110,7 +105,7 @@ class Sounds():
 
     @commands.command()
     async def yt(self, ctx):
-        ctx.trigger_typing()
+        await ctx.trigger_typing()
         vchan = ctx.message.author.voice.channel
         if vchan == None:
             await ctx.send("You're not in a voice channel!")
