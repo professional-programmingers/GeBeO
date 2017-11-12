@@ -7,7 +7,7 @@ import functools
 import youtube_dl
 
 class PlayerOptions(enum.Enum):
-    YTDL = 2
+    LINK = 2
     FILE = 1
 
 class Sounds():
@@ -31,7 +31,7 @@ class Sounds():
                 await self.currentVoiceClient.move_to(soundItem[0])
             if soundItem[2] == PlayerOptions.FILE:
                 self.currentVoiceClient.play(discord.FFmpegPCMAudio(soundItem[1]), after=self.after_sound_clip)
-            elif soundItem[2] == PlayerOptions.YTDL:
+            elif soundItem[2] == PlayerOptions.LINK:
                 opts = {
                     'format': 'webm[abr>0]/bestaudio/best',
                     'prefer_ffmpeg': True
@@ -104,15 +104,15 @@ class Sounds():
         await ctx.send("Cleared the queue and disconnected the bot")
 
     @commands.command()
-    async def yt(self, ctx):
+    async def slink(self, ctx):
         await ctx.trigger_typing()
         vchan = ctx.message.author.voice.channel
         if vchan == None:
             await ctx.send("You're not in a voice channel!")
         else:
-            await self.soundQueue.put((vchan, ctx.arg, PlayerOptions.YTDL))
+            await self.soundQueue.put((vchan, ctx.arg, PlayerOptions.LINK))
             if self.currentVoiceClient == None:
-                await ctx.send("Playing video!")
+                await ctx.send("Playing sound!")
                 await self.play_next_sound()
             else:
                 await ctx.send("Queued as #" + str(self.soundQueue.qsize()))
