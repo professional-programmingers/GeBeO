@@ -31,6 +31,10 @@ class SimpleSay():
 
     @commands.command()
     async def avatar(self, ctx):
+        """
+        Send the URL of the sender or the specified person's avatar
+        USAGE: !avatar (optional: ping specified user)
+        """
         await ctx.trigger_typing()
         if len(ctx.args_split) == 0:
             await ctx.send(ctx.message.author.avatar_url)
