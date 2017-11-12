@@ -8,12 +8,13 @@ class SimpleSay():
         self.nickname_lock = asyncio.Lock()
 
     async def nickname_message(self, ctx, nick : str, msg : str):
+        await ctx.trigger_typing()
         await self.nickname_lock.acquire()
         nickname = ctx.guild.me.display_name
-        await ctx.message.delete()
         await ctx.guild.me.edit(nick=nick)
         await ctx.send(msg)
         await ctx.guild.me.edit(nick=nickname)
+        await ctx.message.delete()
         self.nickname_lock.release()
 
     @commands.command()
@@ -26,8 +27,9 @@ class SimpleSay():
 
     @commands.command()
     async def blowme(self, ctx):
-        await ctx.message.delete()
+        await ctx.trigger_typing()
         await ctx.send("*sucks " + ctx.message.author.display_name + " off*")
+        await ctx.message.delete()
 
     @commands.command()
     async def avatar(self, ctx):
