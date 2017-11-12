@@ -71,7 +71,6 @@ class RoleMsg():
     @commands.has_permissions(administrator=True)
     async def rolemsg(self, ctx):
         await ctx.trigger_typing()
-        await ctx.message.delete()
         print("checkpoint1")
         if len(ctx.args_split) < 2:
             await ctx.send("Wrong")
@@ -94,6 +93,7 @@ class RoleMsg():
             role_msg_cache = open("cache/rolemsg.txt", "w")
             role_msg_cache.write(json.dumps(self.role_msg_list))
             role_msg_cache.close()
+        await ctx.message.delete()
 
 def setup(bot):
     print("setting up rolemsg")

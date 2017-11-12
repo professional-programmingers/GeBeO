@@ -14,14 +14,15 @@ async def filelister(ctx, filedir : str):
             listresponse += f.split(".")[0] + "\n"
     else:
         listresponse = "Can't find anything, add something!"
-    await ctx.send(listresponse)
+    await ctx.author.send(listresponse)
 
 async def filegetter(ctx, filedir : str, handler):
     if len(ctx.args_split) > 0:
         for f in os.listdir(filedir):
             if f.split(".")[0] == ctx.args_split[0].lower():
                 await handler(ctx, filedir + "/" + f)
-                break
+                return
+        await ctx.send("That file doesn't exist!")
     else:
         raise NoNameSpecifiedError("No File Name Specified")
 

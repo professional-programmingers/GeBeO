@@ -10,7 +10,7 @@ if __name__ == '__main__':
     discord_token = f.read().strip()
     f.close()
 
-    bot = BotGeBeO(command_prefix='!', max_messages=5000)
+    bot = BotGeBeO(command_prefix='!', max_messages=5000, pm_help=True)
     # Config dictionary to be passed around.
     bot.config = {
             "debug" : False,
