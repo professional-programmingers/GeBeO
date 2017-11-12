@@ -21,7 +21,8 @@ async def filegetter(ctx, filedir : str, handler):
         for f in os.listdir(filedir):
             if f.split(".")[0] == ctx.args_split[0].lower():
                 await handler(ctx, filedir + "/" + f)
-                break
+                return
+        await ctx.send("That file doesn't exist!")
     else:
         raise NoNameSpecifiedError("No File Name Specified")
 
