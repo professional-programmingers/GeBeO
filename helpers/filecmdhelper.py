@@ -14,7 +14,7 @@ async def filelister(ctx, filedir : str):
             listresponse += f.split(".")[0] + "\n"
     else:
         listresponse = "Can't find anything, add something!"
-    await ctx.send(listresponse)
+    await ctx.author.send(listresponse)
 
 async def filegetter(ctx, filedir : str, handler):
     if len(ctx.args_split) > 0:
