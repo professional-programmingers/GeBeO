@@ -45,20 +45,23 @@ class Sounds():
             await self.currentVoiceClient.disconnect()
             self.currentVoiceClient = None
 
-    def after_sound_clip(self, error):
-        self.bot.loop.create_task(self.play_next_sound())
-
-    async def soundhandler(self, ctx, filename : str):
-        vchan = ctx.message.author.voice.channel
-        if vchan == None:
+    async def add_sound(self, ctx, source, sourcetype):
+        if ctx.message.author.voice == None:
             await ctx.send("You're not in a voice channel!")
         else:
-            await self.soundQueue.put((vchan, filename, PlayerOptions.FILE))
+            vchan = ctx.message.author.voice.channel
+            await self.soundQueue.put((vchan, source, sourcetype))
             if self.currentVoiceClient == None:
                 await ctx.send("Playing sound!")
                 await self.play_next_sound()
             else:
                 await ctx.send("Queued as #" + str(self.soundQueue.qsize()))
+
+    def after_sound_clip(self, error):
+        self.bot.loop.create_task(self.play_next_sound())
+
+    async def soundhandler(self, ctx, filename : str):
+        await self.add_sound(ctx, filename, PlayerOptions.FILE)
 
     @commands.command()
     async def slist(self, ctx):
@@ -66,6 +69,7 @@ class Sounds():
 
     @commands.command()
     async def s(self, ctx):
+        await ctx.trigger_typing()
         try:
             await filegetter(ctx, "sounds", self.soundhandler)
         except NoNameSpecifiedError:
@@ -106,17 +110,7 @@ class Sounds():
     @commands.command()
     async def slink(self, ctx):
         await ctx.trigger_typing()
-        vchan = ctx.message.author.voice.channel
-        if vchan == None:
-            await ctx.send("You're not in a voice channel!")
-        else:
-            await self.soundQueue.put((vchan, ctx.arg, PlayerOptions.LINK))
-            if self.currentVoiceClient == None:
-                await ctx.send("Playing sound!")
-                await self.play_next_sound()
-            else:
-                await ctx.send("Queued as #" + str(self.soundQueue.qsize()))
-
+        await self.add_sound(ctx, ctx.arg, PlayerOptions.LINK)
 
 def setup(bot):
     print("setting up sounds")
