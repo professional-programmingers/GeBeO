@@ -79,10 +79,12 @@ class HelperBot(commands.Bot):
             return None
         return self.currentVoiceClient.channel.id
 
+    def is_in_guild(self, guild_id):
+        return guild_id in self.guilds
+
     async def on_ready(self):
         await self.change_presence(status=discord.Status.invisible)
         print("Helper bot ready!")
-
 
     def get_invite_link(self):
         return "<https://discordapp.com/oauth2/authorize?client_id=" + str(self.user.id) + "&scope=bot&permissions=2146958583>"

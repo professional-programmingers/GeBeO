@@ -25,6 +25,15 @@ class Sounds():
         if ctx.message.author.voice == None:
             await ctx.send("You're not in a voice channel!")
         else:
+            # Check if any bots in guild. Warn user if not.
+            # TODO: Move to Bot Manager.
+            for helper in self.bot.helperList:
+                if helper.is_in_guild(ctx.guild):
+                    break
+            else:
+                await ctx.send("No helper bots in this server. Do !invite to add them.")
+                return
+
             vchan_id = ctx.message.author.voice.channel.id
             sound = await self.parse_sound(source, sourcetype)
 
@@ -62,7 +71,7 @@ class Sounds():
 
         # If not, check for free bots.
         for helper in self.bot.helperList:
-            if helper.is_free():
+            if helper.is_free() and helper.is_in_guild(self.bot.get_channel(channel_id).guild):
                 return helper
         print("No helper available!")
         return None
@@ -142,7 +151,7 @@ class Sounds():
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def invite(self, ctx):
-        # TODO: Move this code to somewhere more generic.
+        # TODO: Move this code to a Bot Manager.
         """ Get all of the helper bot's permissions. """
         send_str = "Here's the helper bots' invite link!\n"
         for helper in self.bot.helperList:
