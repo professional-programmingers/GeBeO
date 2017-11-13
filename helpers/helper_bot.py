@@ -5,6 +5,14 @@ import asyncio
 import youtube_dl
 
 class HelperBot(commands.Bot):
+    """ 
+    Helper bot that gets spawned in a different thread to help the main bot with various things.
+    The general pattern for the class is:
+    - Any async functions should prefixed with _ and called using asyncio.run_coroutine_threadsafe.
+    - asyncio.run_coroutine_threadsafe spawns a new thread that allows async calls to be non-blocking.
+    - Async functions (i.e. any _ prefix methods) should NOT be called externally.
+    - Variables should not be modified externally. Variables should be modified by methods only. (it's OOP)
+    """
     def __init__(self, token, mainBot, **kwargs):
         super().__init__(kwargs)
         self.soundQueue = asyncio.Queue()
@@ -31,6 +39,7 @@ class HelperBot(commands.Bot):
         asyncio.run_coroutine_threadsafe(self._disconnect(), self.loop)
 
     async def _disconnect(self):
+        """ Disconnect from the current voice channel. """
         if self.currentVoiceClient:
             await self.currentVoiceClient.disconnect()
             self.currentVoiceClient = None
