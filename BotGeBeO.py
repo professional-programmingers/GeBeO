@@ -1,3 +1,4 @@
+from helpers.helper_bot import *
 from discord.ext import commands
 
 class GeBeOContext(commands.Context):
@@ -30,3 +31,9 @@ class BotGeBeO(commands.Bot):
         print(self.user.name)
         print(self.user.id)
         print('------')
+        self.helperList = []
+        f = open("tokens/helpers.cfg")
+        helper_tokens = f.readlines()
+        helper_tokens = [x.strip() for x in helper_tokens]
+        for token in helper_tokens:
+            self.helperList.append(HelperBot(token, self, commands_prefix="&&&"))
