@@ -7,15 +7,12 @@ import youtube_dl
 class HelperBot(commands.Bot):
     def __init__(self, token, mainBot, **kwargs):
         super().__init__(kwargs)
-        self.token = token
-        self.mainBot = mainBot
         self.soundQueue = asyncio.Queue()
         self.currentVoiceClient = None
-        print("Running helper")
-        asyncio.run_coroutine_threadsafe(self._run(), self.loop)
+        asyncio.run_coroutine_threadsafe(self._run(token), self.loop)
 
-    async def _run(self):
-        self.run(self.token)
+    async def _run(self, token):
+        self.run(token)
 
 
     def join_channel(self, channel_id):
