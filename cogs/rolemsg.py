@@ -13,12 +13,6 @@ class RoleMsg():
             os.makedirs("cache")
         if os.path.isfile("cache/rolemsg.txt") and os.stat("cache/rolemsg.txt").st_size != 0:
             self.role_msg_list = json.loads(open("cache/rolemsg.txt", "r").read())
-            for rolemsg in self.role_msg_list:
-                if isinstance(rolemsg["msg_chan_id"], str):
-                    print("asdf")
-                    rolemsg["msg_chan_id"] = int(rolemsg["msg_chan_id"])
-                if isinstance(rolemsg["msg_id"], str):
-                    rolemsg["msg_id"] = int(rolemsg["msg_id"])
         else:
             self.role_msg_list = []
             f = open("cache/rolemsg.txt", 'w+')

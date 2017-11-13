@@ -36,12 +36,10 @@ class DayDetector():
                 await self.wednesday_detector(current_time)
             await asyncio.sleep(60)
 
-    wed_detector_channel = "370316975659810816"
-
     async def wednesday_detector(self, current_time):
         if current_time.weekday() == 2:
             my_dudes = "<:MyDudes:304341572168712193> "
-            chan = self.bot.get_channel(self.wed_detector_channel)
+            chan = self.bot.get_channel(self.bot.config["wed_detector_channel"])
             msg = my_dudes * 3 + "It is Wednesday my dudes" + my_dudes * 3
             await chan.send(msg)
             await asyncio.sleep(30)

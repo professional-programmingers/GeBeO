@@ -1,18 +1,11 @@
 from discord.ext import commands
 import asyncio
+import BotGeBeO
 
 class DebugCmds():
-    def __init__(self, bot : commands.Bot):
+    def __init__(self, bot : BotGeBeO.BotGeBeO):
         print("initializing debugcmds")
         self.bot = bot
-
-    debugarg = False
-
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def d(self, ctx):
-        if self.bot.config["debug"]:
-            exec(ctx.arg)
 
     @commands.command()
     @commands.has_permissions(administrator=True)
