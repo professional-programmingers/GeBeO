@@ -90,10 +90,16 @@ class Sounds():
 
     @commands.command()
     async def slist(self, ctx):
+        """ List all available sound bites 
+            USAGE: !slist
+        """
         await filelister(ctx, "sounds")
 
     @commands.command()
     async def s(self, ctx):
+        """ Play a sound bite in the voice channel. Make sure the sounds are added.
+            USAGE: !s sound-name
+        """
         await ctx.trigger_typing()
         try:
             await filegetter(ctx, "sounds", self.soundhandler)
@@ -102,23 +108,36 @@ class Sounds():
 
     @commands.command()
     async def slink(self, ctx):
+        """ Play a sound link in the voice channel. Compatible with youtube, soundcloud, and almost anything.
+            USAGE: !slink link
+        """
         await ctx.trigger_typing()
         await self.add_sound(ctx, ctx.arg, PlayerOptions.LINK)
 
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def sadd(self, ctx):
+        """ Add a sound bite. Admin only.
+            USAGE: !sadd sound-name
+            Make sure to drag the sound file onto discord!
+        """
         await ctx.trigger_typing()
         await fileadder(ctx, "sounds")
 
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def srm(self, ctx):
+        """ Remove a sound bite. Admin only.
+            USAGE: !srm sound-name
+        """
         await ctx.trigger_typing()
         await fileremover(ctx, "sounds")
 
     @commands.command()
     async def sskip(self, ctx):
+        """ Skip a song or sound.
+            USAGE: !sskip
+        """
         await ctx.trigger_typing()
         helper = self.get_helper_in_channel(ctx.author.voice.channel.id)
         if helper:
@@ -129,7 +148,9 @@ class Sounds():
 
     @commands.command()
     async def sclear(self, ctx):
-        """ Clear a bot's queue. """
+        """ Clear a channel's queue. 
+            USAGE: !sclear
+        """
         await ctx.trigger_typing()
         helper = self.get_helper_in_channel(ctx.author.voice.channel.id)
         if helper:
@@ -141,7 +162,9 @@ class Sounds():
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def sclearall(self, ctx):
-        """ Clear all bot's queue. """
+        """ Clear all bot's queue. Admin only.
+            USAGE: !sclearall
+        """
         await ctx.trigger_typing()
         for helper in self.bot.helperList:
             helper.clear_sound()
