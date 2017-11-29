@@ -10,6 +10,11 @@ class PlayerOptions(enum.Enum):
     FILE = 1
     LINK = 2
 
+class SoundItem():
+    def __init__(self, name, location):
+        self.name = name
+        self.location = location
+
 class Sounds():
     def __init__(self, bot : commands.Bot):
         print("initializing sounds")
@@ -40,16 +45,16 @@ class Sounds():
             # Find a bot and add to its queue.
             helper = self.choose_helper(vchan_id)
             if helper != None:
-                helper.queue_sound(vchan_id, sound)
+                await helper.queue_sound(vchan_id, sound)
                 await ctx.send("Queueing sound!")
             else:
                 await ctx.send("Sorry, there are no available bots!")
 
 
-    async def parse_sound(self, source, sourcetype):
+    async def parse_sound(self, source: str, sourcetype):
         """ Take a sound source and turn it into something that can be played by ffmpeg """
         if sourcetype == PlayerOptions.FILE:
-            return source
+            return SoundItem(source.split("/")[-1].split(".")[0], source)
         elif sourcetype == PlayerOptions.LINK:
             opts = {
                 'format': 'webm[abr>0]/bestaudio/best',
@@ -58,8 +63,10 @@ class Sounds():
             ydl = youtube_dl.YoutubeDL(opts)
             func = functools.partial(ydl.extract_info, source, download=False)
             info = await self.bot.loop.run_in_executor(None, func)
+            print(info)
             download_url = info['url']
-            return download_url
+            video_title = info['title']
+            return SoundItem(video_title, download_url)
 
 
     def choose_helper(self, channel_id):
@@ -154,7 +161,7 @@ class Sounds():
         await ctx.trigger_typing()
         helper = self.get_helper_in_channel(ctx.author.voice.channel.id)
         if helper:
-            helper.clear_sound()
+            await helper.clear_sound()
             await ctx.send("Cleared the queue and disconnected the bot")
         else:
             await ctx.send("You're not in a voice channel that has a bot!")
@@ -169,7 +176,24 @@ class Sounds():
         for helper in self.bot.helperList:
             helper.clear_sound()
         await ctx.send("Disconnected all bots!")
-
+    
+    @commands.command(aliases=["sq"])
+    async def squeue(self, ctx):
+        """ Show the queue for the bot that's in your channel
+            USAGE: !squeue
+        """
+        await ctx.trigger_typing()
+        helper = self.get_helper_in_channel(ctx.author.voice.channel.id)
+        if helper:
+            output_message = "```"
+            counter = 1
+            for sound in helper.soundQueue:
+                output_message += "#" + str(counter) + ": " + sound.name + "\n"
+                counter += 1
+            output_message += "```"
+            await ctx.send(output_message)
+        else:
+            await ctx.send("You're not in a voice channel that has a bot!")
 
     @commands.command()
     @commands.has_permissions(administrator=True)
