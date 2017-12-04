@@ -63,7 +63,6 @@ class Sounds():
             ydl = youtube_dl.YoutubeDL(opts)
             func = functools.partial(ydl.extract_info, source, download=False)
             info = await self.bot.loop.run_in_executor(None, func)
-            print(info)
             download_url = info['url']
             video_title = info['title']
             return SoundItem(video_title, download_url)

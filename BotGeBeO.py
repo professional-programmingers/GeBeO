@@ -35,7 +35,6 @@ class BotGeBeO(commands.Bot):
         f = open("tokens/helpers.cfg")
         helper_tokens = f.readlines()
         helper_tokens = [x.strip() for x in helper_tokens]
-        print(helper_tokens)
         for token in helper_tokens:
             new_helper = HelperBot(commands_prefix="&&&")
             self.loop.create_task(new_helper.start(token))

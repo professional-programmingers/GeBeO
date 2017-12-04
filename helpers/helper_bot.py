@@ -6,9 +6,9 @@ import youtube_dl
 
 class HelperBot(commands.Bot):
     """ 
-    Helper bot that gets spawned in a different thread to help the main bot with various things.
-    The general pattern for the class is:
-    - Variables should not be modified externally. Variables should be modified by methods only. (it's OOP)
+    Helper bot that gets spawned by GeBeO to handle playing sounds in multiple channels in one server at once.
+    
+    Must be run using start() and NOT run() (run is blocking)
     """
     def __init__(self, **kwargs):
         super().__init__(kwargs)
