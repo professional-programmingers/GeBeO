@@ -50,7 +50,7 @@ class DayDetector():
         if christmas < current_time:
             christmas = datetime(current_time.year + 1, 12, 25, tzinfo=tz)
         christmas_count = christmas - current_time
-        await self.bot.change_presence(game=discord.Game(name=str(christmas_count.days) + " days to Christmas"), status=discord.Status.online, afk=False)
+        await self.bot.change_presence(game=discord.Game(name=str(christmas_count.days + 1) + " days to Christmas"), status=discord.Status.online, afk=False)
 
     async def on_ready(self):
         self.bot.loop.create_task(self.day_detector())
