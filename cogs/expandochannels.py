@@ -116,4 +116,3 @@ class ExpandoChannels():
 def setup(bot : commands.Bot):
     print("setting up expandochannels")
     bot.add_cog(ExpandoChannels(bot))
-

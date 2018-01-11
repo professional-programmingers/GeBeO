@@ -212,3 +212,4 @@ startup.sh
 cache/
 .vscode/
 config.json
+.vs/
