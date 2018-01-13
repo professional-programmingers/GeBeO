@@ -31,7 +31,10 @@ class Images():
             return
 
         file_name = fh.file_getter("images", ctx.args_split[0].lower())
-        await ctx.send(file=discord.File(file_name, file_name.split("/")[-1]))
+        if file_name:
+            await ctx.send(file=discord.File(file_name, file_name.split("/")[-1]))
+        else:
+            await ctx.send("That file doesn't exist!")
 
     @commands.command()
     @commands.has_permissions(administrator=True)

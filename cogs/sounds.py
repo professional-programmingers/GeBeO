@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord
-from helpers.filecmdhelper import *
+import helpers.file_helper as fh
+import os
 import asyncio
 import enum
 import functools
@@ -25,7 +26,7 @@ class Sounds():
         self.bot = bot
 
 
-    async def add_sound(self, ctx, source, sourcetype):
+    async def add_sound(self, ctx, source):
         """ Add a sound to a bot's queue. """
         if ctx.message.author.voice == None:
             await ctx.send("You're not in a voice channel!")
@@ -40,7 +41,10 @@ class Sounds():
                 return
 
             vchan_id = ctx.message.author.voice.channel.id
-            sound = await self.parse_sound(source, sourcetype)
+            sound = await self.parse_sound(source)
+            if not sound:
+                await ctx.send("Invalid sound name or invalid youtube link!")
+                return
 
             # Find a bot and add to its queue.
             helper = self.choose_helper(vchan_id)
@@ -51,21 +55,29 @@ class Sounds():
                 await ctx.send("Sorry, there are no available bots!")
 
 
-    async def parse_sound(self, source: str, sourcetype):
+    async def parse_sound(self, source: str):
         """ Take a sound source and turn it into something that can be played by ffmpeg """
-        if sourcetype == PlayerOptions.FILE:
+
+        file_name = fh.file_getter("sounds", source.lower())
+        if file_name:
+            source = file_name
             return SoundItem(source.split("/")[-1].split(".")[0], source)
-        elif sourcetype == PlayerOptions.LINK:
-            opts = {
-                'format': 'webm[abr>0]/bestaudio/best',
-                'prefer_ffmpeg': True
-            }
-            ydl = youtube_dl.YoutubeDL(opts)
-            func = functools.partial(ydl.extract_info, source, download=False)
+
+        # Use youtube-dl instead.
+        opts = {
+            'format': 'webm[abr>0]/bestaudio/best',
+            'prefer_ffmpeg': True
+        }
+        ydl = youtube_dl.YoutubeDL(opts)
+        func = functools.partial(ydl.extract_info, source, download=False)
+        try:
             info = await self.bot.loop.run_in_executor(None, func)
             download_url = info['url']
             video_title = info['title']
             return SoundItem(video_title, download_url)
+        except youtube_dl.utils.DownloadError:
+            return None
+            
 
 
     def choose_helper(self, channel_id):
@@ -99,7 +111,7 @@ class Sounds():
         """ List all available sound bites 
             USAGE: !slist
         """
-        await filelister(ctx, "sounds")
+        await fh.filelister(ctx, "sounds")
 
     @commands.command()
     async def s(self, ctx):
@@ -107,10 +119,10 @@ class Sounds():
             USAGE: !s sound-name
         """
         await ctx.trigger_typing()
-        try:
-            await filegetter(ctx, "sounds", self.soundhandler)
-        except NoNameSpecifiedError:
+        if len(ctx.args_split) == 0:
             await ctx.send("No sound specified! If you are looking for a list of available sounds, run `!slist`")
+            return
+        await self.add_sound(ctx, ctx.arg)
 
     @commands.command()
     async def slink(self, ctx):
@@ -118,7 +130,7 @@ class Sounds():
             USAGE: !slink link
         """
         await ctx.trigger_typing()
-        await self.add_sound(ctx, ctx.arg, PlayerOptions.LINK)
+        await ctx.send("This command is deprecated. Use !s instead.")
 
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -128,7 +140,7 @@ class Sounds():
             Make sure to drag the sound file onto discord!
         """
         await ctx.trigger_typing()
-        await fileadder(ctx, "sounds")
+        await fh.fileadder(ctx, "sounds")
 
     @commands.command()
     @commands.has_permissions(administrator=True)
@@ -137,7 +149,7 @@ class Sounds():
             USAGE: !srm sound-name
         """
         await ctx.trigger_typing()
-        await fileremover(ctx, "sounds")
+        await fh.fileremover(ctx, "sounds")
 
     @commands.command()
     async def sskip(self, ctx):
