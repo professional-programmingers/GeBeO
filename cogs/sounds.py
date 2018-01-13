@@ -6,6 +6,7 @@ import asyncio
 import enum
 import functools
 import youtube_dl
+import random
 
 class PlayerOptions(enum.Enum):
     FILE = 1
@@ -123,6 +124,11 @@ class Sounds():
             await ctx.send("No sound specified! If you are looking for a list of available sounds, run `!slist`")
             return
         await self.add_sound(ctx, ctx.arg)
+
+    @commands.command(aliases=['sr'])
+    async def srandom(self, ctx):
+        file_list = sorted(os.listdir('sounds'))
+        await self.add_sound(ctx, file_list[random.randrange(len(file_list))].split("/")[-1].split(".")[0])
 
     @commands.command()
     async def slink(self, ctx):
