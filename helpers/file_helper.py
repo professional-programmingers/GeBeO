@@ -16,15 +16,16 @@ async def filelister(ctx, filedir : str):
         listresponse = "Can't find anything, add something!"
     await ctx.author.send(listresponse)
 
-async def filegetter(ctx, filedir : str, handler):
-    if len(ctx.args_split) > 0:
-        for f in os.listdir(filedir):
-            if f.split(".")[0] == ctx.args_split[0].lower():
-                await handler(ctx, filedir + "/" + f)
-                return
-        await ctx.send("That file doesn't exist!")
-    else:
-        raise NoNameSpecifiedError("No File Name Specified")
+def file_getter(file_dir : str, file_name):
+    """ 
+    Returns the relative path of the specified file from source directory.
+    Returns None if the file doesn't exist.
+    file_name (str) : Name of the file.
+    file_dir (str) : The directory that the file would be located in.
+    """
+    for f in os.listdir(file_dir):
+        if f.split(".")[0] == file_name:
+            return file_dir + "/" + f
 
 async def fileadder(ctx, filedir : str):
     if len(ctx.message.attachments) == 0:
