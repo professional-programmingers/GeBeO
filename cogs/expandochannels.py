@@ -18,7 +18,7 @@ class ExpandoChannels():
         self.update_expando_channel_list()
     
     def update_expando_channel_list(self):
-    """Remove any channels from the expando channel list that don't exist anymore, then update the cache"""
+        """Remove any channels from the expando channel list that don't exist anymore, then update the cache"""
         todelete = []
         for expando_channel in self.expando_channel_list:
             channel = self.bot.get_channel(expando_channel["chan_id"])
