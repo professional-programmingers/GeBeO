@@ -16,8 +16,9 @@ class ExpandoChannels():
 
     async def on_ready(self):
         self.update_expando_channel_list()
-
+    
     def update_expando_channel_list(self):
+    """Remove any channels from the expando channel list that don't exist anymore, then update the cache"""
         todelete = []
         for expando_channel in self.expando_channel_list:
             channel = self.bot.get_channel(expando_channel["chan_id"])
@@ -31,6 +32,10 @@ class ExpandoChannels():
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def expando(self, ctx):
+        """ 
+        Convert the channel the user is currently in to a source expando channel, if it's not already
+        USAGE: !expando
+        """
         if ctx.author.voice is not None:
             vchan = ctx.author.voice.channel
             for ec in self.expando_channel_list:
@@ -46,30 +51,40 @@ class ExpandoChannels():
             await ctx.send("Join the channel you wanna turn into a source expando channel!")
 
     async def update_empty_channel(self, starting_channel):
+        #Go through expando channels starting with the source channel of the channel that was triggered
         chan_index = starting_channel.guild.voice_channels.index(starting_channel)
         last_pos = 0
         perm_is_empty = False
         for vc in starting_channel.guild.voice_channels[chan_index:]:
+            #Find the expando chan dict for the channel we're looking at and store it in expando_chan (if it exists)
             expando_chan = None
             for ec in self.expando_channel_list:
                 if ec["chan_id"] == vc.id:
                     expando_chan = ec
                     break
+            #If the starting channel is a source channel and it's empty, update perm_is_empty so an empty channel isn't created
             if starting_channel == vc and expando_chan["perm"]:
                 last_pos = vc.position
                 if len(vc.members) == 0:
                     perm_is_empty = True
                 continue
+            #If the current channel is an expando chan and is not a source channel...
             if expando_chan is not None and not expando_chan["perm"]:
+                #If the channel is empty, delete it and remove it from the expando_channel_list
                 if len(vc.members) == 0:
                     await vc.delete()
                     self.expando_channel_list.remove(ec)
+                #If it's not empty, take down its position and move on
                 else:
                     last_pos = vc.position
+            #If the current channel is not an expando channel or is a different source channel, we know we're at the end of this string of expando channels so break
             else:
                 break
+        #If the source channel isn't empty, make a new empty channel in the same category as the source channel
         if not perm_is_empty:
             new_chan = await starting_channel.guild.create_voice_channel(self.bot.config["default_channel_name"], category=starting_channel.category)
+            #Try to move the new channel to right below the last expando channel (via last_pos).
+            #This throws an exception if its being moved to the end of all voice channels, because a move isn't necessary
             try:
                 await new_chan.edit(position=last_pos + 1)
             except discord.errors.InvalidArgument:
@@ -78,12 +93,16 @@ class ExpandoChannels():
             expandochan["chan_id"] = new_chan.id
             expandochan["perm"] = False
             self.expando_channel_list.append(expandochan)
+        #Update the cache of expando channels
         expando_channel_cache = open("cache/expandochannel.txt", "w")
         expando_channel_cache.write(json.dumps(self.expando_channel_list))
         expando_channel_cache.close()
 
 
     async def on_voice_state_update(self, member, before: discord.VoiceState, after: discord.VoiceState):
+        #Don't update if the channels are the same (only voice state was updated)
+        if before.channel == after.channel:
+            return
         #Go through the expando channels, saving the source channels for the before and after channels
         before_starting_point = None
         after_starting_point = None
