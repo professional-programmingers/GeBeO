@@ -27,7 +27,7 @@ class Sounds():
         self.bot = bot
 
 
-    async def add_sound(self, ctx, source):
+    async def add_sound(self, ctx, source, play_next=False):
         """ Add a sound to a bot's queue. """
         if ctx.message.author.voice == None:
             await ctx.send("You're not in a voice channel!")
@@ -50,7 +50,7 @@ class Sounds():
             # Find a bot and add to its queue.
             helper = self.choose_helper(vchan_id)
             if helper != None:
-                await helper.queue_sound(vchan_id, sound)
+                await helper.queue_sound(vchan_id, sound, play_next)
                 await ctx.send("Queueing sound!")
             else:
                 await ctx.send("Sorry, there are no available bots!")
@@ -124,6 +124,18 @@ class Sounds():
             await ctx.send("No sound specified! If you are looking for a list of available sounds, run `!slist`")
             return
         await self.add_sound(ctx, ctx.arg)
+
+    @commands.command(aliases=['sn'])
+    @commands.has_permissions(administrator=True)
+    async def snext(self, ctx):
+        """ Play a sound bite in the voice channel. Make sure the sounds are added.
+            USAGE: !s sound-name
+        """
+        await ctx.trigger_typing()
+        if len(ctx.args_split) == 0:
+            await ctx.send("No sound specified! If you are looking for a list of available sounds, run `!slist`")
+            return
+        await self.add_sound(ctx, ctx.arg, True)
 
     @commands.command(aliases=['sr'])
     async def srandom(self, ctx):
