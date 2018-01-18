@@ -103,6 +103,16 @@ class ExpandoChannels():
         #Don't update if the channels are the same (only voice state was updated)
         if before.channel == after.channel:
             return
+        #Don't update if you don't need to (the channel you left is empty and/or the channel you joined was empty)
+        if before.channel is not None and after.channel is not None:
+            if not len(before.channel.members) == 0 and not len(after.channel.members) == 0:
+                return
+        if after.channel is None:
+            if not len(before.channel.members) == 0:
+                return
+        if before.channel is None:
+            if not len(after.channel.members) == 1:
+                return
         #Go through the expando channels, saving the source channels for the before and after channels
         before_starting_point = None
         after_starting_point = None
