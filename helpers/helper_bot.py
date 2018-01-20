@@ -34,7 +34,7 @@ class HelperBot(commands.Bot):
 
     async def queue_sound(self, channel_id, sound, play_next):
         """ Add a sound to the queue. If no sound in queue yet, add then start playing."""
-        if next:
+        if play_next:
             self.soundQueue.insert(0, sound)
         else:
             self.soundQueue.append(sound)
