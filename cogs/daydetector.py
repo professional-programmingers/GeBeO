@@ -27,7 +27,7 @@ class DayDetector():
             print("Current time: " + str(current_time))
             print("Weekday = " + str(current_time.weekday()))
 
-            await self.christmas_countdown(current_time, tz)
+            await self.year_percentage(current_time, tz)
 
             current_weekday = current_time.weekday()
             if current_weekday != last_weekday:
@@ -45,12 +45,13 @@ class DayDetector():
             await asyncio.sleep(30)
             await chan.send(self.wednesday_self_reply[random.randrange(len(self.wednesday_self_reply))])
 
-    async def christmas_countdown(self, current_time, tz):
-        christmas = datetime(current_time.year, 12, 25, tzinfo=tz)
-        if christmas < current_time:
-            christmas = datetime(current_time.year + 1, 12, 25, tzinfo=tz)
-        christmas_count = christmas - current_time
-        await self.bot.change_presence(game=discord.Game(name=str(christmas_count.days + 1) + " days to Christmas"), status=discord.Status.online, afk=False)
+    async def year_percentage(self, current_time, tz):
+        year_date_range = datetime(current_time.year + 1, 1, 1) - datetime(current_time.year, 1, 1)
+        year_num_seconds = year_date_range.total_seconds()
+        today_date_range = current_time - datetime(current_time.year, 1, 1, tzinfo=tz)
+        today_num_seconds = today_date_range.total_seconds()
+        percent_complete = round((today_num_seconds / year_num_seconds) * 100000) / 1000
+        await self.bot.change_presence(game=discord.Game(name="{:0.3f}".format(percent_complete) + "% thru " + str(current_time.year) + "!"), status=discord.Status.online, afk=False)
 
     async def on_ready(self):
         self.bot.loop.create_task(self.day_detector())
