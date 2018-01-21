@@ -6,6 +6,7 @@ import asyncio
 import enum
 import functools
 import youtube_dl
+import requests
 import random
 
 class PlayerOptions(enum.Enum):
@@ -51,7 +52,7 @@ class Sounds():
             helper = self.choose_helper(vchan_id)
             if helper != None:
                 await helper.queue_sound(vchan_id, sound, play_next)
-                await ctx.send("Queueing sound!")
+                await ctx.send("Queueing " + sound.name + "!")
             else:
                 await ctx.send("Sorry, there are no available bots!")
 
@@ -137,6 +138,19 @@ class Sounds():
             return
         await self.add_sound(ctx, ctx.arg, True)
 
+    @commands.command()
+    async def syt(self, ctx):
+        await ctx.trigger_typing()
+        f = open("tokens/youtube.cfg", "r")
+        youtube_token = f.read().strip()
+        f.close()
+        if len(ctx.args_split) == 0:
+            await ctx.send("No search specified")
+            return
+        r = requests.get("https://www.googleapis.com/youtube/v3/search", params = {"part": "snippet", "q": ctx.arg, "type": "video", "key": youtube_token})
+        print(r.json())
+        await self.add_sound(ctx, "https://www.youtube.com/watch?v=" + r.json()["items"][0]["id"]["videoId"])
+
     @commands.command(aliases=['sr'])
     async def srandom(self, ctx):
         file_list = sorted(os.listdir('sounds'))
@@ -215,9 +229,14 @@ class Sounds():
         helper = self.get_helper_in_channel(ctx.author.voice.channel.id)
         if helper:
             output_message = "```"
-            counter = 1
+            counter = 0
             for sound in helper.soundQueue:
-                output_message += "#" + str(counter) + ": " + sound.name + "\n"
+                num = ""
+                if counter == 0:
+                    num = "Now"
+                else:
+                    num = "#" + str(counter)
+                output_message += num + ": " + sound.name + "\n"
                 counter += 1
             output_message += "```"
             await ctx.send(output_message)
