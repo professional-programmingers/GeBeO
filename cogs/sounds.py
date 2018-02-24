@@ -217,7 +217,7 @@ class Sounds():
         """
         await ctx.trigger_typing()
         for helper in self.bot.helperList:
-            helper.clear_sound()
+            await helper.clear_sound()
         await ctx.send("Disconnected all bots!")
     
     @commands.command(aliases=["sq"])
