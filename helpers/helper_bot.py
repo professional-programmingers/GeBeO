@@ -47,7 +47,7 @@ class HelperBot(commands.Bot):
         """ Play the next sound in queue. If none, disconnect """
         if len(self.soundQueue) != 0:
             sound = self.soundQueue[0]
-            self.currentVoiceClient.play(discord.FFmpegPCMAudio(sound.location), after=self.after_sound_clip)
+            self.currentVoiceClient.play(discord.FFmpegPCMAudio(sound.location, options="-filter:a loudnorm"), after=self.after_sound_clip)
         else:
             await self.disconnect()
 
