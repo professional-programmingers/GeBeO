@@ -1,4 +1,5 @@
 from discord.ext import commands
+import re
 import discord
 import helpers.file_helper as fh
 import os
@@ -8,15 +9,17 @@ import functools
 import youtube_dl
 import requests
 import random
+import traceback
 
 class PlayerOptions(enum.Enum):
     FILE = 1
     LINK = 2
 
 class SoundItem():
-    def __init__(self, name, location):
+    def __init__(self, name, location, timestamp=None):
         self.name = name
         self.location = location
+        self.timestamp = timestamp
 
 class Sounds():
     def __init__(self, bot : commands.Bot):
@@ -48,6 +51,10 @@ class Sounds():
                 await ctx.send("Invalid sound name or invalid youtube link!")
                 return
 
+            # Report if there was error processing timestamp.
+            if self._parse_for_timestamp(source) == -1:
+                await ctx.send(":sweat: Oops! Something went wrong while processing that timestamp. Starting at the beginning.")
+
             # Find a bot and add to its queue.
             helper = self.choose_helper(vchan_id)
             if helper != None:
@@ -58,7 +65,9 @@ class Sounds():
 
 
     async def parse_sound(self, source: str):
-        """ Take a sound source and turn it into something that can be played by ffmpeg """
+        """ Take a sound source and turn it into something that can be played by ffmpeg
+            Returns a SoundItem if successful. None if otherwise.
+        """
 
         file_name = fh.file_getter("sounds", source.lower())
         if file_name:
@@ -76,7 +85,7 @@ class Sounds():
             info = await self.bot.loop.run_in_executor(None, func)
             download_url = info['url']
             video_title = info['title']
-            return SoundItem(video_title, download_url)
+            return SoundItem(video_title, download_url, self._parse_for_timestamp(source))
         except youtube_dl.utils.DownloadError:
             return None
             
@@ -252,6 +261,35 @@ class Sounds():
         for helper in self.bot.helperList:
             send_str += helper.get_invite_link() + '\n'
         await ctx.author.send(send_str)
+
+
+    def _parse_for_timestamp(self, link):
+        """ Parses a youtube link to extract timestamp.
+            Returns timestamp in seconds. Returns None if no timestamp found.
+            Returns -1 if something weird happened while processing timestamp.
+        """
+        # That regex captures the time between t= and (& or end of line), excluding those chars.
+        match = re.search('(?<=t=).*?(?=&|$)', link)
+        if not match:
+            return None
+        timestamp = link[match.start():match.end()]
+        # Two possible timestamp format: '1h1m40s', or '3700'.
+        try:
+            ret = 0
+            if 'h' in timestamp.lower():
+                hour, timestamp = timestamp.lower().split('h')
+                ret += int(hour) * 3600
+            if 'm' in timestamp.lower():
+                minute, timestamp = timestamp.lower().split('m')
+                ret += int(minute) * 60
+            # Remove any trailing 's'
+            timestamp = timestamp.lower().rstrip('s')
+            ret += int(timestamp)
+            return ret
+        except:  # Except all errors here and print a traceback.
+            traceback.print_exc()
+            return -1
+
 
 def setup(bot):
     print("setting up sounds")
