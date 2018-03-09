@@ -10,6 +10,8 @@ import youtube_dl
 import requests
 import random
 import traceback
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
 
 class PlayerOptions(enum.Enum):
     FILE = 1
@@ -24,11 +26,17 @@ class SoundItem():
 class Sounds():
     def __init__(self, bot : commands.Bot):
         print("initializing sounds")
- 
+
         if not os.path.exists("sounds"):
             os.makedirs("sounds")
 
         self.bot = bot
+
+        f = open("tokens/spotify.cfg")
+        spotify_tokens = f.readlines()
+        spotify_tokens = [x.strip() for x in spotify_tokens]
+        cred_manager = SpotifyClientCredentials(spotify_tokens[0], spotify_tokens[1])
+        self.spotipy = spotipy.Spotify(client_credentials_manager=cred_manager)
 
 
     async def add_sound(self, ctx, source, play_next=False):
@@ -74,6 +82,10 @@ class Sounds():
             source = file_name
             return SoundItem(source.split("/")[-1].split(".")[0], source)
 
+        if "open.spotify.com" in source:
+            result = self.spotipy.track(source)
+            source = self.yt_search(result['name'] + result['artists'][0]['name'])
+
         # Use youtube-dl instead.
         opts = {
             'format': 'webm[abr>0]/bestaudio/best',
@@ -88,7 +100,7 @@ class Sounds():
             return SoundItem(video_title, download_url, self._parse_for_timestamp(source))
         except youtube_dl.utils.DownloadError:
             return None
-            
+
 
 
     def choose_helper(self, channel_id):
@@ -112,14 +124,22 @@ class Sounds():
             if channel_id == helper.get_channel_id():
                 return helper
         return None
-        
+
+
+    def yt_search(self, search_terms):
+        f = open("tokens/youtube.cfg", "r")
+        youtube_token = f.read().strip()
+        f.close()
+        r = requests.get("https://www.googleapis.com/youtube/v3/search", params = {"part": "snippet", "q": search_terms, "type": "video", "key": youtube_token})
+        return "https://www.youtube.com/watch?v=" + r.json()["items"][0]["id"]["videoId"]
+
 
     async def soundhandler(self, ctx, filename : str):
         await self.add_sound(ctx, filename, PlayerOptions.FILE)
 
     @commands.command()
     async def slist(self, ctx):
-        """ List all available sound bites 
+        """ List all available sound bites
             USAGE: !slist
         """
         await fh.filelister(ctx, "sounds")
@@ -150,15 +170,10 @@ class Sounds():
     @commands.command()
     async def syt(self, ctx):
         await ctx.trigger_typing()
-        f = open("tokens/youtube.cfg", "r")
-        youtube_token = f.read().strip()
-        f.close()
         if len(ctx.args_split) == 0:
             await ctx.send("No search specified")
             return
-        r = requests.get("https://www.googleapis.com/youtube/v3/search", params = {"part": "snippet", "q": ctx.arg, "type": "video", "key": youtube_token})
-        print(r.json())
-        await self.add_sound(ctx, "https://www.youtube.com/watch?v=" + r.json()["items"][0]["id"]["videoId"])
+        await self.add_sound(ctx, self.yt_search(ctx.arg))
 
     @commands.command(aliases=['sr'])
     async def srandom(self, ctx):
@@ -207,7 +222,7 @@ class Sounds():
 
     @commands.command()
     async def sclear(self, ctx):
-        """ Clear a channel's queue. 
+        """ Clear a channel's queue.
             USAGE: !sclear
         """
         await ctx.trigger_typing()
@@ -228,7 +243,7 @@ class Sounds():
         for helper in self.bot.helperList:
             await helper.clear_sound()
         await ctx.send("Disconnected all bots!")
-    
+
     @commands.command(aliases=["sq"])
     async def squeue(self, ctx):
         """ Show the queue for the bot that's in your channel
