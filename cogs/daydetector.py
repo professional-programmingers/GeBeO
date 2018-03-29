@@ -34,7 +34,8 @@ class DayDetector():
                 last_weekday = current_weekday
 
                 await self.wednesday_detector(current_time)
-            await asyncio.sleep(60)
+            for i in range(60):
+                await asyncio.sleep(1)
 
     async def wednesday_detector(self, current_time):
         if current_time.weekday() == 2:
@@ -59,4 +60,3 @@ class DayDetector():
 def setup(bot : commands.Bot):
     print("setting up daydetector")
     bot.add_cog(DayDetector(bot))
-
