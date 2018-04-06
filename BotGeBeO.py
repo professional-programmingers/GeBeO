@@ -27,6 +27,14 @@ class BotGeBeO(commands.Bot):
             await ctx.send("Sorry, you must be admin to use that command!")
 
 
+    async def on_guild_join(self, guild):
+        guildDirPath = "guilds/guild-" + str(guild.id)
+        if not os.path.exists(guildDirPath):
+            os.makedirs(guildDirPath + "/sounds")
+            os.makedirs(guildDirPath + "/images")
+            os.makedirs(guildDirPath + "/cache")
+
+
     async def on_ready(self):
         print('Logged in as')
         print(self.user.name)
@@ -37,6 +45,7 @@ class BotGeBeO(commands.Bot):
             if not os.path.exists(guildDirPath):
                 os.makedirs(guildDirPath + "/sounds")
                 os.makedirs(guildDirPath + "/images")
+                os.makedirs(guildDirPath + "/cache")
 
         self.helperList = []
         f = open("tokens/helpers.cfg")

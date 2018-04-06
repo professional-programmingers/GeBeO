@@ -54,7 +54,7 @@ class Sounds():
                 return
 
             vchan_id = ctx.message.author.voice.channel.id
-            sound = await self.parse_sound(source)
+            sound = await self.parse_sound(ctx, source)
             if not sound:
                 await ctx.send("Invalid sound name or invalid youtube link!")
                 return
@@ -72,7 +72,7 @@ class Sounds():
                 await ctx.send("Sorry, there are no available bots!")
 
 
-    async def parse_sound(self, source: str):
+    async def parse_sound(self, ctx, source: str):
         """ Take a sound source and turn it into something that can be played by ffmpeg
             Returns a SoundItem if successful. None if otherwise.
         """

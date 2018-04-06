@@ -13,8 +13,6 @@ class RoleMsg():
     async def on_ready(self):
         for g in self.bot.guilds:
             guildDirPath = "guilds/guild-" + str(g.id)
-            if not os.path.exists(guildDirPath + "/" + "cache"):
-                os.makedirs(guildDirPath + "/" + "cache")
             if os.path.isfile(guildDirPath + "/" + "cache/rolemsg.json") and os.stat(guildDirPath + "/" + "cache/rolemsg.json").st_size != 0:
                 self.role_msg_list[g.id] = json.loads(open(guildDirPath + "/" + "cache/rolemsg.json", "r").read())
             else:

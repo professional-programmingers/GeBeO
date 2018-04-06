@@ -20,9 +20,6 @@ class Github():
         for g in self.bot.guilds:
             guildDirPath = "guilds/guild-" + str(g.id)
 
-            if not os.path.exists(guildDirPath + "/" + "cache"):
-                os.makedirs(guildDirPath + "/" + "cache")
-
             if os.path.isfile(guildDirPath + "/" + self.file_name) and os.stat(guildDirPath + "/" + self.file_name).st_size != 0:
                 f = open(guildDirPath + "/" + self.file_name, "r")
                 self.registered_channels[g.id] = json.loads(f.read())
