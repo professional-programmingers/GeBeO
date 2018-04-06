@@ -49,7 +49,13 @@ class Config():
     async def cfgset(self, ctx):
         await ctx.trigger_typing()
         if len(ctx.args_split) >= 2:
-            self.bot.config[cfg.guild.id][ctx.args_split[0]] = ctx.args_split[1]
+            if ctx.args_split[1] == "null":
+                self.bot.config[ctx.guild.id][ctx.args_split[0]] = None
+            else:
+                try:
+                    self.bot.config[ctx.guild.id][ctx.args_split[0]] = int(ctx.args_split[1])
+                except ValueError:
+                    self.bot.config[ctx.guild.id][ctx.args_split[0]] = ctx.args_split[1]
             await ctx.send("Setting " + ctx.args_split[0] + " to " + ctx.args_split[1] + " and saving the config file!")
         else:
             await ctx.send("That's not enough data to configure anything, but I'll save the config file anyway!")

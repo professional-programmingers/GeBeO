@@ -27,9 +27,6 @@ class Sounds():
     def __init__(self, bot : commands.Bot):
         print("initializing sounds")
 
-        if not os.path.exists("sounds"):
-            os.makedirs("sounds")
-
         self.bot = bot
 
         f = open("tokens/spotify.cfg")

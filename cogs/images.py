@@ -10,9 +10,6 @@ class Images():
     def __init__(self, bot : commands.Bot):
         print("initializing images")
 
-        if not os.path.exists("images"):
-            os.makedirs("images")
-
         self.bot = bot
 
     #async def image_handler(self, ctx, filename : str):
