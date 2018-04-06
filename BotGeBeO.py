@@ -1,5 +1,6 @@
 from helpers.helper_bot import *
 from discord.ext import commands
+import os
 
 class GeBeOContext(commands.Context):
     args_split = None
@@ -31,6 +32,12 @@ class BotGeBeO(commands.Bot):
         print(self.user.name)
         print(self.user.id)
         print('------')
+        for g in self.guilds:
+            guildDirPath = "guilds/guild-" + str(g.id)
+            if not os.path.exists(guildDirPath):
+                os.makedirs(guildDirPath + "/sounds")
+                os.makedirs(guildDirPath + "/images")
+
         self.helperList = []
         f = open("tokens/helpers.cfg")
         helper_tokens = f.readlines()

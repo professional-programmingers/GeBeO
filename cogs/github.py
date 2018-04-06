@@ -16,22 +16,25 @@ class Github():
         self.file_name = "cache/github.json"
         self.api_base = "https://api.github.com/"
 
-        # Create a cache dir if it doesn't exists.
-        if not os.path.exists("cache"):
-            os.makedirs("cache")
+    async def on_ready(self):
+        for g in self.bot.guilds:
+            guildDirPath = "guilds/guild-" + str(g.id)
 
-        # Check for cache file.
-        if os.path.isfile(self.file_name) and os.stat(self.file_name).st_size != 0:
-            f = open(self.file_name, "r")
-            self.registered_channels = json.loads(f.read())
-        else:
-            f = open(self.file_name, "w+")
-        f.close()
+            if not os.path.exists(guildDirPath + "/" + "cache"):
+                os.makedirs(guildDirPath + "/" + "cache")
+
+            if os.path.isfile(guildDirPath + "/" + self.file_name) and os.stat(guildDirPath + "/" + self.file_name).st_size != 0:
+                f = open(guildDirPath + "/" + self.file_name, "r")
+                self.registered_channels[g.id] = json.loads(f.read())
+            else:
+                self.registered_channels[g.id] = {}
+                f = open(guildDirPath + "/" + self.file_name, "w+")
+            f.close()
 
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def gitreg(self, ctx):
-        """ 
+        """
         Registers a channel to listen to.
         USAGE: !gitreg owner/repo
             In the future maybe different types of registration.
@@ -41,13 +44,14 @@ class Github():
             await ctx.send("Invalid number of arguments")
             return
 
-        if str(ctx.message.channel.id) in self.registered_channels:
+        if str(ctx.message.channel.id) in self.registered_channels[ctx.guild.id]:
             await ctx.send("This channel is already registered!")
         else:
+            guildDirPath = "guilds/guild-" + str(ctx.guild.id)
             # Register channel.
-            self.registered_channels[str(ctx.message.channel.id)] = ctx.args_split[0].strip('/')
-            f = open(self.file_name, "w+")
-            f.write(json.dumps(self.registered_channels))
+            self.registered_channels[ctx.guild.id][str(ctx.message.channel.id)] = ctx.args_split[0].strip('/')
+            f = open(guildDirPath + "/" + self.file_name, "w+")
+            f.write(json.dumps(self.registered_channels[ctx.guild.id]))
             f.close()
             await ctx.send("Successfully registered!")
 
@@ -55,15 +59,15 @@ class Github():
     @commands.command()
     @commands.has_permissions(administrator=True)
     async def gitrm(self, ctx):
-        """ 
+        """
         Remove the channel from the registered channel list.
         USAGE: !gitrm
         """
         await ctx.trigger_typing()
-        if str(ctx.message.channel.id) in self.registered_channels:
-            del self.registered_channels[str(ctx.message.channel.id)]
-            f = open(self.file_name, "w+")
-            f.write(json.dumps(self.registered_channels))
+        if str(ctx.message.channel.id) in self.registered_channels[ctx.guild.id]:
+            del self.registered_channels[ctx.guild.id][str(ctx.message.channel.id)]
+            f = open(guildDirPath + "/" + self.file_name, "w+")
+            f.write(json.dumps(self.registered_channels[ctx.guild.id]))
             f.close()
             await ctx.send("Channel removed!")
         else:
@@ -71,14 +75,14 @@ class Github():
 
 
     async def on_message(self, message):
-        """ 
+        """
         For each messages, check for issue numbers denoted as #number.
         Then print out the associated url for each issues to the channel.
         """
 
-        if str(message.channel.id) in self.registered_channels:
+        if str(message.channel.id) in self.registered_channels[message.guild.id]:
             # Get info on the current channel.
-            channel_info = self.registered_channels[str(message.channel.id)]
+            channel_info = self.registered_channels[message.guild.id][str(message.channel.id)]
             issues_list = self.parse_issues(message)
             url_list = []  # URL list of issues to be printed to channel.
 
@@ -124,8 +128,8 @@ class Github():
                 issues_list.append(issue_number)
         issues_list.sort()
         return issues_list
-        
-    
+
+
 def setup(bot):
     print("setting up github tracker")
     bot.add_cog(Github(bot))

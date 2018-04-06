@@ -77,7 +77,7 @@ class Sounds():
             Returns a SoundItem if successful. None if otherwise.
         """
 
-        file_name = fh.file_getter("sounds", source.lower())
+        file_name = fh.file_getter(ctx, "sounds", source.lower())
         if file_name:
             source = file_name
             return SoundItem(source.split("/")[-1].split(".")[0], source)

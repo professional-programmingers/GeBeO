@@ -34,17 +34,23 @@ class DayDetector():
                 last_weekday = current_weekday
 
                 await self.wednesday_detector(current_time)
+
             for i in range(60):
                 await asyncio.sleep(1)
 
     async def wednesday_detector(self, current_time):
         if current_time.weekday() == 2:
             my_dudes = "<:MyDudes:304341572168712193> "
-            chan = self.bot.get_channel(self.bot.config["wed_detector_channel"])
             msg = my_dudes * 3 + "It is Wednesday my dudes" + my_dudes * 3
-            await chan.send(msg)
+            for g in self.bot.guilds:
+                if self.bot.config[g.id]["wed_detector_channel"] == None:
+                    chan = self.bot.get_channel(self.bot.config[g.id]["wed_detector_channel"])
+                    await chan.send(msg)
             await asyncio.sleep(30)
-            await chan.send(self.wednesday_self_reply[random.randrange(len(self.wednesday_self_reply))])
+            for g in self.bot.guilds:
+                if self.bot.config[g.id]["wed_detector_channel"] == None:
+                    chan = self.bot.get_channel(self.bot.config[g.id]["wed_detector_channel"])
+                    await chan.send(self.wednesday_self_reply[random.randrange(len(self.wednesday_self_reply))])
 
     async def year_percentage(self, current_time, tz):
         year_date_range = datetime(current_time.year + 1, 1, 1) - datetime(current_time.year, 1, 1)

@@ -30,7 +30,7 @@ class Images():
             await ctx.send("No image specified! If you are looking for a list of available images, run `!ilist`")
             return
 
-        file_name = fh.file_getter("images", ctx.args_split[0].lower())
+        file_name = fh.file_getter(ctx, "images", ctx.args_split[0].lower())
         if file_name:
             await ctx.send(file=discord.File(file_name, file_name.split("/")[-1]))
         else:

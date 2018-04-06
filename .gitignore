@@ -213,3 +213,4 @@ cache/
 .vscode/
 config.json
 .vs/
+guilds/*

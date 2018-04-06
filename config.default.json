@@ -1,4 +1,5 @@
 {
     "wed_detector_channel": 167319706863140864,
-    "default_channel_name": "Game Room"
+    "default_channel_name": "Game Room",
+    "expando_channels": true
 }
