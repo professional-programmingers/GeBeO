@@ -44,7 +44,7 @@ class ExpandoChannels():
                     await before.channel.delete()
         if after.channel is not None:
             if len(after.channel.members) == 1 and after.channel.name[0] == "🎮":
-                if self.bot.config[after.channels.guild.id]["expando_channels"]:
+                if self.bot.config[after.channel.guild.id]["expando_channels"]:
                     await self.update_empty_channel(after.channel)
 
 def setup(bot : commands.Bot):
