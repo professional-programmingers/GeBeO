@@ -76,6 +76,9 @@ class Github():
         For each messages, check for issue numbers denoted as #number.
         Then print out the associated url for each issues to the channel.
         """
+        
+        if message.guild is None:
+            return
 
         if str(message.channel.id) in self.registered_channels[message.guild.id]:
             # Get info on the current channel.
