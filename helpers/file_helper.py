@@ -8,7 +8,7 @@ class NoNameSpecifiedError(Exception):
 
 async def filelister(ctx, filedir : str):
     listoffiles = sorted(os.listdir("guilds/guild-" + str(ctx.guild.id) + "/" + filedir))
-    listresponse = "`" + ctx.prefix + "` (" + ctx.guild.name "):\n"
+    listresponse = "`" + ctx.prefix + "` (" + ctx.guild.name + "):\n"
     if listoffiles != []:
         listresponse += "`"
         for f in listoffiles:
