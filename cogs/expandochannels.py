@@ -18,7 +18,7 @@ class ExpandoChannels():
                     else :
                         await ctx.send("Your admins have disabled Expando Channels. Get them to enable it to use this feature!")
 
-    async def update_empty_channel(self, starting_channel):
+    async def update_empty_channel(self, guild_id, starting_channel):
         #Go through expando channels starting with the channel that was triggered
         chan_index = starting_channel.guild.voice_channels.index(starting_channel)
         last_pos = 0
@@ -27,7 +27,7 @@ class ExpandoChannels():
                 last_pos = vc.position
             else:
                 break
-        new_chan = await starting_channel.guild.create_voice_channel("🎮 " + self.bot.config["default_channel_name"], category=starting_channel.category)
+        new_chan = await starting_channel.guild.create_voice_channel("🎮 " + self.bot.config[guild_id]["default_channel_name"], category=starting_channel.category)
         #Try to move the new channel to right below the last expando channel (via last_pos).
         #This throws an exception if its being moved to the end of all voice channels, because a move isn't necessary
         if last_pos < len(starting_channel.guild.voice_channels):
@@ -45,7 +45,7 @@ class ExpandoChannels():
         if after.channel is not None:
             if len(after.channel.members) == 1 and after.channel.name[0] == "🎮":
                 if self.bot.config[after.channel.guild.id]["expando_channels"]:
-                    await self.update_empty_channel(after.channel)
+                    await self.update_empty_channel(after.channel.guild.id, after.channel)
 
 def setup(bot : commands.Bot):
     print("setting up expandochannels")
