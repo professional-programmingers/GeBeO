@@ -69,6 +69,11 @@ class ComplexSay():
             "NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm")
         await ctx.send(ctx.arg.translate(rot13Trans))
         await ctx.message.delete()
+    
+    @commands.command()
+    async def rot26(self, ctx):
+        await ctx.send(ctx.arg)
+        await ctx.message.delete()
 
 def setup(bot):
     print("setting up complexsay")
