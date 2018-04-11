@@ -1,5 +1,6 @@
 from discord.ext import commands
 from cowpy import cow
+from enigma.machine import EnigmaMachine
 import re
 from random import randint
 import asyncio
@@ -8,6 +9,13 @@ class ComplexSay():
     def __init__(self, bot : commands.Bot):
         print("initializing complexsay")
         self.bot = bot
+
+        self.machine = EnigmaMachine.from_key_sheet(
+            rotors="V I II",
+            reflector="B",
+            ring_settings="07 11 15",
+            plugboard_settings="AZ CJ WF UY SO QV MI NH DP GX"
+        )
 
     @commands.command()
     async def cowsay(self, ctx):
@@ -61,7 +69,7 @@ class ComplexSay():
     async def say(self, ctx):
         await ctx.send(ctx.arg)
         await ctx.message.delete()
-        
+
     @commands.command()
     async def rot13(self, ctx):
         rot13Trans = str.maketrans(
@@ -69,10 +77,16 @@ class ComplexSay():
             "NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm")
         await ctx.send(ctx.arg.translate(rot13Trans))
         await ctx.message.delete()
-    
+
     @commands.command()
     async def rot26(self, ctx):
         await ctx.send(ctx.arg)
+        await ctx.message.delete()
+
+    @commands.command()
+    async def enigma(self, ctx):
+        self.machine.set_display('ABC')
+        await ctx.send(self.machine.process_text(ctx.arg))
         await ctx.message.delete()
 
 def setup(bot):
