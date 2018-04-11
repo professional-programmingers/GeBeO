@@ -3,6 +3,7 @@ from cowpy import cow
 import re
 from random import randint
 import asyncio
+import string
 
 class ComplexSay():
     def __init__(self, bot : commands.Bot):
@@ -60,6 +61,15 @@ class ComplexSay():
     @commands.command()
     async def say(self, ctx):
         await ctx.send(ctx.arg)
+        await ctx.message.delete()
+        
+    @commands.command()
+    async def rot13(self, ctx):
+        rot13Trans = string.maketrans(
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+            "NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm")
+        await ctx.send(
+            string.translate(ctx.arg, rot13trans))
         await ctx.message.delete()
 
 def setup(bot):
