@@ -5,9 +5,9 @@ import asyncio
 import youtube_dl
 
 class HelperBot(commands.Bot):
-    """ 
+    """
     Helper bot that gets spawned by GeBeO to handle playing sounds in multiple channels in one server at once.
-    
+
     Must be run using start() and NOT run() (run is blocking)
     """
     def __init__(self, **kwargs):
@@ -30,7 +30,7 @@ class HelperBot(commands.Bot):
         if self.currentVoiceClient:
             await self.currentVoiceClient.disconnect()
             self.currentVoiceClient = None
-        
+
 
     async def queue_sound(self, channel_id, sound, play_next):
         """ Add a sound to the queue. If no sound in queue yet, add then start playing."""
@@ -49,14 +49,12 @@ class HelperBot(commands.Bot):
             sound = self.soundQueue[0]
             if not sound.timestamp or sound.timestamp == -1:
                 self.currentVoiceClient.play(discord.FFmpegPCMAudio(
-                    sound.location, 
-                    options="-filter:a loudnorm"), 
+                    sound.location),
                     after=self.after_sound_clip)
             else:
                 self.currentVoiceClient.play(discord.FFmpegPCMAudio(
-                    sound.location, 
-                    before_options="-ss " + str(sound.timestamp),
-                    options="-t 99999 -filter:a loudnorm"),
+                    sound.location,
+                    before_options="-ss " + str(sound.timestamp)),
                     after=self.after_sound_clip)
         else:
             await self.disconnect()

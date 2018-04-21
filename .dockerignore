@@ -1,0 +1,14 @@
+.git
+
+.gitignore
+.gitmodules
+bot.png
+LICENSE
+README.md
+
+__pycache__
+cogs/__pycache__
+helpers/__pycache__
+
+tokens
+guilds
