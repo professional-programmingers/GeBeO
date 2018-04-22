@@ -45,6 +45,15 @@ class SimpleSay():
                 await ctx.send("Please mention a user to get the avatar of!")
             else:
                 await ctx.send(ctx.message.mentions[0].avatar_url)
+    
+    @commands.command()
+    async def disapprove(self, ctx):
+        """
+        I disapprove of this command.
+        """
+        await ctx.trigger_typing()
+        await ctx.send("ಠ_ಠ")
+        await ctx.message.delete()
 
 def setup(bot):
     print("setting up simplesay")
