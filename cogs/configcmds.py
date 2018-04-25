@@ -52,11 +52,12 @@ class Config():
             if ctx.args_split[1] == "null":
                 self.bot.config[ctx.guild.id][ctx.args_split[0]] = None
             else:
+                val = " ".join(ctx.args_split[1:])
                 try:
-                    self.bot.config[ctx.guild.id][ctx.args_split[0]] = int(ctx.args_split[1])
+                    self.bot.config[ctx.guild.id][ctx.args_split[0]] = int(val)
                 except ValueError:
-                    self.bot.config[ctx.guild.id][ctx.args_split[0]] = ctx.args_split[1]
-            await ctx.send("Setting " + ctx.args_split[0] + " to " + ctx.args_split[1] + " and saving the config file!")
+                    self.bot.config[ctx.guild.id][ctx.args_split[0]] = val
+            await ctx.send("Setting " + ctx.args_split[0] + " to " + val + " and saving the config file!")
         else:
             await ctx.send("That's not enough data to configure anything, but I'll save the config file anyway!")
         self.save_config(ctx.guild.id)
