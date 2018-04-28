@@ -3,7 +3,7 @@ from BotGeBeO import *
 import json
 import os
 
-startup_extensions = ["configcmds", "simplesay", "complexsay", "react", "timer", "images", "sounds", "rolemsg", "daydetector", "debugcmds", "github", "expandochannels"]
+startup_extensions = ["administration", "configcmds", "simplesay", "complexsay", "react", "timer", "images", "sounds", "rolemsg", "daydetector", "debugcmds", "github", "expandochannels"]
 
 
 if __name__ == '__main__':
