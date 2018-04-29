@@ -1,0 +1,20 @@
+{
+  "name": "GeBeO.js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc && node GeBeO.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "9.6.0",
+    "discord.js": "git+https://git@github.com/discordjs/discord.js.git",
+    "discord.js-commando": "git+https://git@github.com/discordjs/Commando.git",
+    "ffmpeg-binaries": "^3.2.2-3",
+    "node-opus": "^0.2.7"
+  }
+}
