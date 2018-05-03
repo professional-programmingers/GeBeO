@@ -4,14 +4,15 @@ import * as fs from "fs";
 
 process.on('unhandledRejection', console.error);
 
-const client: Commando.Client = new Commando.Client({
+const client: Commando.CommandoClient = new Commando.CommandoClient({
   owner: "137429565063692289"
 });
 
 client.registry
   .registerGroups([
     ['fun', 'Fun'],
-    ['util', 'Util']
+    ['util', 'Util'],
+    ['admin', 'Administration']
   ])
   .registerDefaults()
   .registerCommandsIn(path.join(__dirname, 'commands'));

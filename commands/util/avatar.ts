@@ -3,7 +3,7 @@ import * as Discord from 'discord.js';
 
 
 module.exports = class AvatarCommand extends Commando.Command {
-  constructor(client: Commando.Client) {
+  constructor(client: Commando.CommandoClient) {
     super(client, {
       name: 'avatar',
       group: 'util',

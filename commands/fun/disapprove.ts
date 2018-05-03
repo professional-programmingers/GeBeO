@@ -2,7 +2,7 @@ import * as Commando from 'discord.js-commando';
 import * as Discord from 'discord.js';
 
 module.exports = class DisapproveCommand extends Commando.Command {
-  constructor(client: Commando.Client) {
+  constructor(client: Commando.CommandoClient) {
     super(client, {
       name: 'disapprove',
       group: 'fun',

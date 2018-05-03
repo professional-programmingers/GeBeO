@@ -3,7 +3,7 @@ import * as Discord from 'discord.js';
 import * as Jimp from 'jimp';
 
 module.exports = class SpankCommand extends Commando.Command {
-  constructor(client: Commando.Client) {
+  constructor(client: Commando.CommandoClient) {
     super(client, {
       name: 'spank',
       group: 'fun',
@@ -46,6 +46,6 @@ module.exports = class SpankCommand extends Commando.Command {
         resolve(result);
       });
     });
-    return msg.channel.send('', new Discord.MessageAttachment(buffer));
+    return msg.channel.send('', new Discord.Attachment(buffer));
   }
 }
