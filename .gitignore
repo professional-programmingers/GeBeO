@@ -64,3 +64,4 @@ typings/
 *.js.map
 
 tokens
+cache
