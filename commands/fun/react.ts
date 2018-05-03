@@ -7,7 +7,7 @@ module.exports = class ReactCommand extends Commando.Command {
   constructor(client: Commando.CommandoClient) {
     super(client, {
       name: 'react',
-      group: 'util',
+      group: 'fun',
       memberName: 'react',
       description: 'React to the previous message with the command arguments.',
       argsType: 'single'
