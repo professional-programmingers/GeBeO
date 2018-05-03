@@ -11,8 +11,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/node": "9.6.0",
-    "@types/request": "^2.47.0",
     "discord.js": "git+https://git@github.com/discordjs/discord.js.git",
     "discord.js-commando": "git+https://git@github.com/discordjs/Commando.git",
     "ffmpeg-binaries": "^3.2.2-3",
@@ -20,5 +18,10 @@
     "node-opus": "^0.2.7",
     "request": "^2.85.0",
     "webp-converter": "^2.1.6"
+  },
+  "devDependencies": {
+    "typescript": "^2.8.3",
+    "@types/node": "9.6.0",
+    "@types/request": "^2.47.0"
   }
 }
