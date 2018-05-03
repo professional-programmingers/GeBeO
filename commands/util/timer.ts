@@ -1,35 +1,6 @@
 import * as Commando from 'discord.js-commando';
 import * as Discord from 'discord.js';
 
-function timertask(duration: number, length: number, startTime: number, msg: Discord.Message) {
-  let text: string;
-  let diffTime: number = Math.floor((Date.now() - startTime) / 1000);
-  let currentTime: number = diffTime > duration ? duration : diffTime;
-  if (currentTime <= duration / 3) {
-    text = "\`\`\`diff\n-";
-  } else if (currentTime <= duration * 2/3) {
-    text = "\`\`\`diff\n ";
-  } else {
-    text = "\`\`\`diff\n+";
-  }
-  text += " " + currentTime + " |";
-  let progress: number = Math.round(currentTime / duration * length);
-  if (progress > 0) {
-    text += "-".repeat(progress);
-  }
-  if (length - progress > 0) {
-    text += " ".repeat(length - progress);
-  }
-  text += "| " + duration + "\n\`\`\`";
-  msg.edit(text).then((value: Discord.Message) => {
-    if (diffTime <= duration) {
-      setTimeout(timertask, 1000, duration, length, startTime, value);
-    } else {
-      value.react('⏰');
-    }
-  })
-}
-
 module.exports = class TimerCommand extends Commando.Command {
   constructor(client: Commando.CommandoClient) {
     super(client, {
@@ -67,9 +38,37 @@ module.exports = class TimerCommand extends Commando.Command {
     if (length < 1) {
       return msg.reply("Length must be longer than 0!")
     }
+    await this.timertask(duration, length, Date.now(), msg.channel);
+    return msg.delete();
+  }
+
+  async timertask(duration: number, length: number, startTime: number, channel: Discord.TextChannel | Discord.DMChannel | Discord.GroupDMChannel) {
     let counter: number = 1;
     let text: string = "\`\`\`diff\n-  0 |" + " ".repeat(length) + "| " + duration + "\n\`\`\`";
-    let message: Discord.Message = await msg.channel.send(text) as Discord.Message;
-    setTimeout(timertask, 1000, duration, length, Date.now(), message);
+    let message: Discord.Message = await channel.send(text) as Discord.Message;
+    let diffTime: number = Math.floor((Date.now() - startTime) / 1000);
+    while (diffTime < duration) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      diffTime = Math.floor((Date.now() - startTime) / 1000);
+      let currentTime: number = diffTime > duration ? duration : diffTime;
+      if (currentTime <= duration / 3) {
+        text = "\`\`\`diff\n-";
+      } else if (currentTime <= duration * 2/3) {
+        text = "\`\`\`diff\n ";
+      } else {
+        text = "\`\`\`diff\n+";
+      }
+      text += " " + currentTime + " |";
+      let progress: number = Math.round(currentTime / duration * length);
+      if (progress > 0) {
+        text += "-".repeat(progress);
+      }
+      if (length - progress > 0) {
+        text += " ".repeat(length - progress);
+      }
+      text += "| " + duration + "\n\`\`\`";
+      await message.edit(text);
+    }
+    message.react("⏰");
   }
 }
