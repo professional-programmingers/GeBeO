@@ -1,9 +1,6 @@
 import * as Commando from 'discord.js-commando';
 import * as Discord from 'discord.js';
 import * as Jimp from 'jimp';
-import * as request from 'request';
-import * as fs from 'fs';
-let webp: any = require('webp-converter');
 
 module.exports = class SpankCommand extends Commando.Command {
   constructor(client: Commando.Client) {
@@ -30,8 +27,18 @@ module.exports = class SpankCommand extends Commando.Command {
 
   async run(msg: Commando.CommandMessage, args: any): Promise<Discord.Message | Discord.Message[]> {
     let spank: Jimp.Jimp = await Jimp.read('./resources/spank.jpg');
-    let spanker: Jimp.Jimp = await Jimp.read(args.spanker.displayAvatarURL().slice(0, -4) + "jpg");
-    let spanked: Jimp.Jimp = await Jimp.read(args.spanked.displayAvatarURL().slice(0, -4) + "jpg");
+    let spankerLoc: string = args.spanker.displayAvatarURL();
+    let spankedLoc: string = args.spanked.displayAvatarURL();
+    if (spankerLoc.substring(spankerLoc.length - 4) == "webp") {
+      spankerLoc = spankerLoc.slice(0, -4) + "jpg";
+    }
+    if (spankedLoc.substring(spankedLoc.length - 4) == "webp") {
+      spankedLoc = spankedLoc.slice(0, -4) + "jpg";
+    }
+    let spanker: Jimp.Jimp = await Jimp.read(spankerLoc);
+    let spanked: Jimp.Jimp = await Jimp.read(spankedLoc);
+    spanker.resize(128, 128);
+    spanked.resize(128, 128);
     await spank.composite(spanker, 310, 40);
     await spank.composite(spanked, 460, 290);
     let buffer: Buffer = await new Promise<Buffer>((resolve) => {
@@ -40,11 +47,5 @@ module.exports = class SpankCommand extends Commando.Command {
       });
     });
     return msg.channel.send('', new Discord.MessageAttachment(buffer));
-  }
-
-  async convertWebP(webploc: string): Promise<any> {
-    let jpgloc: String = webploc.slice(0, -4);
-    jpgloc += 'jpg';
-    return new Promise(resolve => webp.dwebp(webploc, jpgloc, '-o', resolve));
   }
 }
