@@ -9,8 +9,17 @@ module.exports = class ReactCommand extends Commando.Command {
       name: 'react',
       group: 'fun',
       memberName: 'react',
-      description: 'React to the previous message with the command arguments.',
-      argsType: 'single'
+      description: 'React to the previous message or a specified message (by id).',
+      examples: [
+        '!react <comment_id> ay lmao', '!react very go0d'
+      ],
+      args: [
+        {
+          key: 'content',
+          prompt: 'Enter in your reactions. Optional: Enter in the message id before the reactions',
+          type: 'string',
+        },
+      ],
     })
 
     this.emojitable = {
@@ -58,28 +67,36 @@ module.exports = class ReactCommand extends Commando.Command {
 
   emojitable: any;
 
-  async run(msg: Commando.CommandMessage, arg: string): Promise<Discord.Message | Discord.Message[]> {
-    let lastMessage: Discord.Message = (await msg.channel.fetchMessages({limit: 1, before: msg.id})).last();
+  async run(msg: Commando.CommandMessage, arg: any): Promise<Discord.Message | Discord.Message[]> {
+    let content: any = arg.content;
+    let targetMessage: Discord.Message;
+    try{
+      targetMessage = await msg.channel.fetchMessage(content.split(' ')[0]);
+      content = content.split(' ').slice(1).join(' ');
+    }
+    catch{
+      targetMessage = (await msg.channel.fetchMessages({limit: 1, before: msg.id})).last();
+    }
     let spaceCounter: number = 0;
-    for (let i = 0; i < arg.length; i++) {
+    for (let i = 0; i < content.length; i++) {
       let emoji: string = null;
-      if (arg[i] == ' ') {
-        if (spaceCounter < this.emojitable[arg[i]].length) {
-          emoji = this.emojitable[arg[i]][spaceCounter];
+      if (content[i] == ' ') {
+        if (spaceCounter < this.emojitable[content[i]].length) {
+          emoji = this.emojitable[content[i]][spaceCounter];
           spaceCounter++;
         }
       } else {
-        emoji = this.emojitable[arg[i]];
+        emoji = this.emojitable[content[i]];
       }
       if (emoji != null) {
         try {
-          await lastMessage.react(emoji);
+          await targetMessage.react(emoji);
         } catch (err) {
           if (err instanceof Discord.DiscordAPIError) {
             return;
           }
         }
-        await lastMessage.react(emoji);
+        await targetMessage.react(emoji);
       }
     }
     return msg.delete();

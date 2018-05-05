@@ -5,7 +5,7 @@ import * as fs from "fs";
 process.on('unhandledRejection', console.error);
 
 const client: Commando.CommandoClient = new Commando.CommandoClient({
-  owner: "137429565063692289"
+  owner: ["137429565063692289", "127564963270098944"]
 });
 
 client.registry

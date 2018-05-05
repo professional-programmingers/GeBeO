@@ -57,6 +57,9 @@ typings/
 # dotenv environment variables file
 .env
 
+#Vim
+.*swp
+
 # next.js build output
 .next
 
@@ -65,3 +68,5 @@ typings/
 
 tokens
 cache
+
+
