@@ -12,10 +12,12 @@ client.registry
   .registerGroups([
     ['fun', 'Fun'],
     ['util', 'Util'],
-    ['admin', 'Administration']
+    ['admin', 'Administration'],
+    ['images', 'Images'],
   ])
   .registerDefaults()
-  .registerCommandsIn(path.join(__dirname, 'commands'));
+  .registerCommandsIn(path.join(__dirname, 'commands'))
+  .registerCommandsIn(path.join(__dirname, 'commands/util'));
 
 let token: string = fs.readFileSync("tokens/discord.cfg", "utf8");
 
@@ -24,5 +26,12 @@ token = token.replace(/\s/g, "");
 client.on('ready', () => {
   console.log(`Client ready; logged in as ${client.user.username}#${client.user.discriminator} (${client.user.id})`);
 })
+client.on("error", (e) => {console.error(e)});
+client.on("warn", (e) => {console.warn(e)});
+client.on("commandError", (command, err, message, args, pattern) => 
+  {
+    console.log("Error from command: " + command.name);
+    console.log(err);
+  });
 
 client.login(token);
