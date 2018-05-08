@@ -21,6 +21,6 @@ module.exports = class AvatarCommand extends Commando.Command {
   }
 
   async run(msg: Commando.CommandMessage, arg: any): Promise<Discord.Message | Discord.Message[]> {
-    return msg.channel.send(arg.person.displayAvatarURL());
+    return msg.channel.send(arg.person.displayAvatarURL);
   }
 }
