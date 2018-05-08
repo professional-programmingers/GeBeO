@@ -70,3 +70,5 @@ tokens
 cache
 
 guilds/*
+
+database.sqlite3
