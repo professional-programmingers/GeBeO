@@ -15,22 +15,22 @@ module.exports = class RenameVCCommand extends Commando.Command {
 
   async run(msg: Commando.CommandMessage, arg: string): Promise<Discord.Message | Discord.Message[]> {
     if (!msg.member) {
-      return msg.reply('must be in a server voice chat to do that!');
+      return msg.reply('this command must be used in a guild!');
     }
 
-    if (!msg.member.voiceChannel || msg.member.voiceChannel.name[0] == '🎮') {
-      return msg.reply('must be in an expando channel to use this command!');
+    let prefix: string = (msg.guild as any).settings.get('expando_name_prefix', '🎮 ') as string;
+
+    if (!msg.member.voiceChannel || msg.member.voiceChannel.name.substring(0, prefix.length) != prefix) {
+      return msg.reply('you must be in an expando channel to use this command!');
     }
     
     if (arg == "") {
       let name: string = (msg.guild as any).settings.get('expando_default_name', 'Game Room') as string;
-      let prefix: string = (msg.guild as any).settings.get('expando_name_prefix', '🎮') as string;
       msg.member.voiceChannel.setName(prefix + ' ' + name);
-      return msg.reply('set the name of the expando channel you\'re in to \`' + prefix + ' ' + name + '\`');
+      return msg.reply('set the name of the expando channel you\'re in to \`' + prefix + name + '\`');
     } else {
-      let prefix: string = (msg.guild as any).settings.get('expando_name_prefix', '🎮') as string;
       msg.member.voiceChannel.setName(prefix + ' ' + arg);
-      return msg.reply('set the name of the expando channel you\'re in to \`' + prefix + ' ' + arg + '\`');
+      return msg.reply('set the name of the expando channel you\'re in to \`' + prefix + arg + '\`');
     }
 
   }
