@@ -39,7 +39,7 @@ client.on("commandError", (command, err, message, args, pattern) =>
     console.log(err);
   });
 
-let listeners: string[] = ['expando'];
+let listeners: string[] = ['expando', 'daydetector'];
 
 for (let i = 0; i < listeners.length; i++) {
   const listener: any = require('./listeners/' + listeners[i]);
