@@ -1,8 +1,8 @@
 import * as Commando from 'discord.js-commando';
 import * as Discord from 'discord.js';
-const fs = require('fs');
-const request = require('request');
-const path = require('path');
+import * as fs from 'fs';
+import * as request from 'request';
+import * as path from 'path';
 const __rootDir = path.dirname(require.main.filename);
 
 export enum FileType{
@@ -10,8 +10,8 @@ export enum FileType{
   Sound,
 }
 
-let downloadFile = function (fileUrl: string, path: string) : Promise<any> {
-  return request(fileUrl).pipe(fs.createWriteStream(path));
+let downloadFile = function (fileUrl: string, path: string) {
+  request(fileUrl).pipe(fs.createWriteStream(path));
 }
 
 let sanitizeName = function (fileName: string) {
@@ -19,7 +19,7 @@ let sanitizeName = function (fileName: string) {
 }
 
 
-let initializeGuild = function (guildId: string): void {
+export function initializeGuild (guildId: string): void {
   /* Check if a guild exists, initialize it if it doesn't.*/
   if (!fs.existsSync(__rootDir + '/guilds/')) {
     fs.mkdirSync(__rootDir + '/guilds/');
@@ -34,16 +34,17 @@ let initializeGuild = function (guildId: string): void {
 }
 
 
-let getGuildDir = function (guildId: string, fileType: FileType): string {
+export function getGuildDir (guildId: string, fileType?: FileType): string {
   let guildDir: string = `${__rootDir}/guilds/guild-${guildId}`;
-  if (fileType == FileType.Image) {
-    guildDir += '/images/';
-  }
-  else if (fileType == FileType.Sound){
-    guildDir += '/sounds/';
-  }
-  else {
-    throw 'Invalid file type.';
+  if (fileType != undefined) {
+    if (fileType == FileType.Image) {
+      guildDir += '/images/';
+    }
+    else if (fileType == FileType.Sound){
+      guildDir += '/sounds/';
+    }  
+  } else {
+    guildDir += '/';
   }
   return guildDir;
 }
@@ -57,8 +58,7 @@ let fileExists = function (fileName: string, guildId: string, fileType: FileType
 }
 
 
-exports.addFile = 
-function ( attachment: Discord.MessageAttachment, guildId: string, fileName: string, fileType: FileType): void {
+export function addFile ( attachment: Discord.MessageAttachment, guildId: string, fileName: string, fileType: FileType): void {
   /* Add a file under the correct guild directory*/
   initializeGuild(guildId);
   if (fileExists(fileName, guildId, fileType)){
@@ -70,16 +70,14 @@ function ( attachment: Discord.MessageAttachment, guildId: string, fileName: str
 }
 
 
-exports.listFile =
-function (guildId: string, fileType: FileType): string[]{
+export function listFile (guildId: string, fileType: FileType): string[]{
   /* Returns string[] of file names.*/
   let guildDir: string = getGuildDir(guildId, fileType);
   let files: string[] = fs.readdirSync(guildDir);
   return files.sort();
 }
 
-exports.getFile = 
-function (fileName: string, guildId: string, fileType: FileType): string {
+export function getFile (fileName: string, guildId: string, fileType: FileType): string {
   /* Returns the absolute path to the file. */
   if (fileExists(fileName, guildId, fileType)){
     return getGuildDir(guildId, fileType) + sanitizeName(fileName);
@@ -89,8 +87,7 @@ function (fileName: string, guildId: string, fileType: FileType): string {
   }
 }
 
-exports.removeFile = 
-function (fileName: string, guildId: string, fileType: FileType): void {
+export function removeFile (fileName: string, guildId: string, fileType: FileType): void {
   /* */
   if (fileExists(fileName, guildId, fileType)){
     fs.unlinkSync(getGuildDir(guildId, fileType) + sanitizeName(fileName));

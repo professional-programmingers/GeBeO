@@ -1,8 +1,6 @@
 import * as Commando from 'discord.js-commando';
 import * as Discord from 'discord.js';
-const path = require('path');
-const __rootdir = path.dirname(require.main.filename);
-const fh = require(__rootdir + '/helpers/file_helper');
+import * as fh from '../../../helpers/file_helper';
 
 
 module.exports = class ImageRemoveCommand extends Commando.Command {

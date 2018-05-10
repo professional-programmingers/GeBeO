@@ -24,7 +24,7 @@ async function expandoUpdate(oldMember: Discord.GuildMember, newMember: Discord.
     }
 }
 
-    async function update_empty_channel(guild: Discord.Guild, channel: Discord.VoiceChannel, prefix: string) {
+async function update_empty_channel(guild: Discord.Guild, channel: Discord.VoiceChannel, prefix: string) {
     let lastPos: number = 0;
     let passedChan: boolean = false;
     
