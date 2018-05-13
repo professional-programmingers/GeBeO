@@ -96,3 +96,8 @@ export function removeFile (fileName: string, guildId: string, fileType: FileTyp
     throw 'File doesn\'t exist.';
   }
 }
+
+export function getName (filePath: string): string {
+  /* Return the name of the file given its path (including extension).*/
+  return filePath.split('/').slice(-1)[0];
+}
