@@ -72,19 +72,21 @@ module.exports = class RoleMsgCommand extends Commando.Command {
     let roleFile: string = fh.getGuildDir(messageReaction.message.guild.id) + 'rolemsg.json';
     if (fs.existsSync(roleFile)) {
       let roleMsgs: RoleMsg[] = JSON.parse(fs.readFileSync(roleFile, 'utf8'));
-      let roleMsg: RoleMsg;
+      let roleMsg: RoleMsg = null;
       roleMsgs.forEach((value: RoleMsg) => {
         if (value.channelId == messageReaction.message.channel.id && value.msgId == messageReaction.message.id) {
           roleMsg = value;
         }
       });
-      if (messageReaction.emoji.toString() == '✅') {
-        let role: Discord.Role = messageReaction.message.guild.roles.get(roleMsg.roleId);
-        let lastMember: Discord.GuildMember = messageReaction.message.guild.members.get(user.id);
-        await lastMember.addRole(role);
-      } else {
-        await messageReaction.remove(user);
-      }  
+      if (roleMsg != null) {
+        if (messageReaction.emoji.toString() == '✅') {
+          let role: Discord.Role = messageReaction.message.guild.roles.get(roleMsg.roleId);
+          let lastMember: Discord.GuildMember = messageReaction.message.guild.members.get(user.id);
+          await lastMember.addRole(role);
+        } else {
+          await messageReaction.remove(user);
+        }  
+      }
     }
   }
   
