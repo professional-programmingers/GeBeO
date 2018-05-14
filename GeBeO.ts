@@ -75,10 +75,11 @@ client.login(token);
 
 Sound.addBot(client as Discord.Client);
 
-console.log(fs.readFileSync('tokens/helper.cfg', 'utf8'));
-let helperTokens: string[] = fs.readFileSync('tokens/helper.cfg', 'utf8').split('\n').slice(0, -1);
-for(let i = 0; i < helperTokens.length; i++){
-  let bot_client: Discord.Client = new Discord.Client();
-  bot_client.login(helperTokens[i].replace(/\s/g, ''));
-  Sound.addBot(bot_client);
+if(fs.existsSync('tokens/helper.json')){
+  let helperTokens: string[] = JSON.parse(fs.readFileSync('tokens/helper.json', 'utf8'));
+  for(let i = 0; i < helperTokens.length; i++){
+    let bot_client: Discord.Client = new Discord.Client();
+    bot_client.login(helperTokens[i]);
+    Sound.addBot(bot_client);
+  }
 }
