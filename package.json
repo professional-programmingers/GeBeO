@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@types/node": "9.6.0",
-    "@types/request": "^2.47.0"
+    "@types/request": "^2.47.0",
+    "@types/youtube-dl": "^1.12.0"
   }
 }

@@ -3,7 +3,7 @@ import * as Discord from 'discord.js';
 import * as Commando from 'discord.js-commando';
 import * as fs from 'fs';
 import {Bot} from 'helpers/bot';
-import * as youtubedl from 'youtube-dl';
+const youtubedl = require('youtube-dl');
 
 
 enum SoundType {
@@ -97,6 +97,27 @@ export class SoundClass {
   };
 
 
+  skipSound = (voiceChannel: Discord.VoiceChannel): void => {
+    this.playNext(voiceChannel.id);
+  }
+
+
+  clearQueue = (voiceChannel: Discord.VoiceChannel): void => {
+    this.queueDict.get(voiceChannel.id).queue = []
+    this.playNext(voiceChannel.id);
+  }
+
+
+  getQueueMessage = (voiceChannel: Discord.VoiceChannel): string => {
+    let message: string = '';
+    let queue: SoundItem[] = this.queueDict.get(voiceChannel.id).queue;
+    for (let i = 0; i < queue.length; i++) {
+      message += '#' + (i + 1) + ': ' + queue[i].name + '\n';
+    }
+    return message;
+  }
+
+
   private queueNext = async (): Promise<void> => {
     /* Place the requested sound into the channel's queue. */
     if (this.preQueueLocked || this.preQueue.length == 0) {
@@ -152,7 +173,8 @@ export class SoundClass {
     let output: any = null;
     try {
       output = await new Promise ((resolve, reject) => {
-        youtubedl(soundInput, ['-j'], {}).on('info', (jsonOutput: any) => {//.exec(soundInput, ['-j'], {}, (err: any, output: any) => {
+        youtubedl.getInfo(soundInput, [], (err: any, jsonOutput: any) => {
+          if (err) throw err;
           resolve(jsonOutput);
         });
       });

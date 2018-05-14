@@ -7,25 +7,17 @@ import {Sound} from 'utils/sounds';
 module.exports = class SoundGetCommand extends Commando.Command {
   constructor(client: Commando.CommandoClient) {
     super(client, {
-      name: 's',
+      name: 'sclear',
       group: 'util',
-      memberName: 's',
-      description: 'Play the specified sound file or link into the caller\'s voice channel.',
-      argsType: 'single',
-      args: [
-        {
-          key: 'input',
-          prompt: 'Enter a sound name or link!',
-          type: 'string',
-        }
-      ]
+      memberName: 'sclear',
+      description: 'Clear the queue and disconnect the bot from the user\'s current voice channel.',
     })
   }
 
-  async run(msg: Commando.CommandMessage, {input}: any): Promise<Discord.Message | Discord.Message[]> {
+  async run(msg: Commando.CommandMessage, arg: any): Promise<Discord.Message | Discord.Message[]> {
     if (msg.member.voiceChannel) {
       try {
-        Sound.queueSound(input, msg.member.voiceChannel);
+        Sound.clearQueue(msg.member.voiceChannel);
       }
       catch(err) {
         return msg.reply(err);
@@ -33,6 +25,6 @@ module.exports = class SoundGetCommand extends Commando.Command {
     } else {
       return msg.channel.send("you have to be in a voice channel to do that!");
     }
-    return msg.channel.send("Sound queued!");
+    return msg.channel.send("Queue cleared and bot disconnected!");
   }
 }
