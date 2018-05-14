@@ -94,7 +94,6 @@ module.exports = class ReactCommand extends Commando.Command {
             return;
           }
         }
-        await targetMessage.react(emoji);
       }
     }
     return msg.delete();
