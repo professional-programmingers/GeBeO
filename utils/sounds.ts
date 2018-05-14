@@ -3,7 +3,7 @@ import * as Discord from 'discord.js';
 import * as Commando from 'discord.js-commando';
 import * as fs from 'fs';
 import {Bot} from 'helpers/bot';
-const youtubedl = require('youtube-dl');
+import * as youtubedl from 'youtube-dl';
 
 
 enum SoundType {
@@ -11,13 +11,13 @@ enum SoundType {
   File,
 }
 
-interface SoundItem {
-  name: string;
+class SoundItem {
+  constructor(public name: string,
+              public location: string,
+              public soundType: SoundType,
+              public timestamp?: number) {}
   // rs contains the sound information. VoiceConnection.playStream will play directly from this.
   // rs is a ReadableStream. Not typed because it might store youtubedl streams, which has emitters that ReadableStream doesn't have.
-  rs: any;  
-  soundType: SoundType;
-  timestamp?: number;
 }
 
 interface ChannelQueue {
@@ -80,7 +80,7 @@ export class SoundClass {
     await cQueue.bot.connect(voiceChannelId);
 
     // Pop first sound item from queue and play it.
-    let dispatcher: Discord.StreamDispatcher = cQueue.bot.play(cQueue.queue.shift().rs);
+    let dispatcher: Discord.StreamDispatcher = cQueue.bot.play(cQueue.queue.shift().location);
 
     // Setup a callback for when this sound finishes playing.
     dispatcher.on('end', () => {
@@ -133,67 +133,39 @@ export class SoundClass {
 
   private parseSoundInput = async (soundInput: string, voiceChannel: Discord.VoiceChannel): Promise<SoundItem> => {
     /* Parse the sound input into a SoundItem. Returns a SoundItem. */
-    let soundItem: SoundItem = {
-      name: null,
-      rs: null,
-      soundType: null,
-    } as SoundItem;
+    let soundItem: SoundItem = null;
 
-    let soundType: SoundType = await this.determineSoundType(soundInput, voiceChannel.guild.id);
-    if (soundType == SoundType.File){
-      let filePath: string = fh.getFile(soundInput, voiceChannel.guild.id, fh.FileType.Sound);
-      soundItem.name = soundInput;
-      soundItem.rs = fs.createReadStream(filePath) as any;
-      soundItem.soundType = SoundType.File;
-    }
-
-    if (soundType == SoundType.Link){
-      // Start the youtube-dl download.
-      // TODO:
-      // Download is a bit slow. Potential solution, use an external downloader (aria2?).
-      // Also possible that the youtubedl node package is terrible.
-      soundItem.rs = youtubedl(soundInput, ['--audio-quality=9', '--prefer-ffmpeg']);
-
-      // Get info about this video. Sets name when info is received. Does not block anything.
-      new Promise((resolve, reject) => {
-        soundItem.rs.on('info', (info: any) => {
-          resolve(info);
-        })
-        .on('error', (err: any) => {reject(err)});
-      }).then((info: any) => {
-        soundItem.name = info.title;
-        console.log("Name is set, sound item's name is: " + soundItem.name);
-      });
-      soundItem.soundType = SoundType.Link;
-    }
-    return soundItem;
-  }
-
-
-  private determineSoundType = async (soundInput: string, guildId: string) : Promise<SoundType> => {
-    /* Figure out what kind of sound type this is given user input. Returns a SoundType*/
-    // Check if a sound file.
+    let filePath: string = null;
     try {
-      fh.getFile(soundInput, guildId, fh.FileType.Sound);
-      return SoundType.File;
+      filePath = fh.getFile(soundInput, voiceChannel.guild.id, fh.FileType.Sound);
     } catch (err) {
       console.log(err);
       // getFile failed, not a file sound.
       // Code continues.
     }
-    // Check if is a valid youtube-dl link.
+
+    if (filePath) {
+      soundItem = new SoundItem(soundInput, filePath, SoundType.File);
+      return soundItem;
+    }
+
+    let output: any = null;
     try {
-      await new Promise ((resolve, reject) => {
-        youtubedl.exec(soundInput, ['-j'], {}, (err: any, output: any) => {
-          if(err) reject(err);
-          resolve();
+      output = await new Promise ((resolve, reject) => {
+        youtubedl(soundInput, ['-j'], {}).on('info', (jsonOutput: any) => {//.exec(soundInput, ['-j'], {}, (err: any, output: any) => {
+          resolve(jsonOutput);
         });
       });
-      return SoundType.Link;
     } catch (err) {
+      console.log(err);
       // youtube-dl throws an error.
     }
-    throw 'Invalid link or sound file!';
+
+    if (output) {
+      soundItem = new SoundItem(output.title, output.url, SoundType.Link);
+    }
+
+    return soundItem;
   }
 }
 
