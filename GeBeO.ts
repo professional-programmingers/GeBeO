@@ -39,6 +39,28 @@ client.on("commandError", (command, err, message, args, pattern) =>
     console.log(err);
   });
 
+client.on('raw', async (event: any) => {
+  if (event.t !== 'MESSAGE_REACTION_ADD' && event.t !== 'MESSAGE_REACTION_REMOVE') return;
+
+	const { d: data } = event;
+	const user = client.users.get(data.user_id);
+	const channel: Discord.TextChannel | Discord.DMChannel = client.channels.get(data.channel_id) as Discord.TextChannel || await user.createDM();
+
+	// if the message is already in the cache, don't re-emit the event
+	if (channel.messages.has(data.message_id)) return;
+
+	// if you're on the master/v12 branch, use `channel.messages.fetch()`
+	const message = await channel.fetchMessage(data.message_id);
+
+	// custom emojis reactions are keyed in a `name:ID` format, while unicode emojis are keyed by names
+	// if you're on the master/v12 branch, custom emojis reactions are keyed by their ID
+	const emojiKey = (data.emoji.id) ? `${data.emoji.name}:${data.emoji.id}` : data.emoji.name;
+  const reaction = message.reactions.get(emojiKey);
+  
+  if (event.t == 'MESSAGE_REACTION_ADD') client.emit('messageReactionAdd', reaction, user);
+  if (event.t == 'MESSAGE_REACTION_REMOVE') client.emit('messageReactionRemove', reaction, user);
+});
+
 let listeners: string[] = ['expando', 'daydetector'];
 
 for (let i = 0; i < listeners.length; i++) {
@@ -53,6 +75,7 @@ client.login(token);
 
 Sound.addBot(client as Discord.Client);
 
+console.log(fs.readFileSync('tokens/helper.cfg', 'utf8'));
 let helperTokens: string[] = fs.readFileSync('tokens/helper.cfg', 'utf8').split('\n').slice(0, -1);
 for(let i = 0; i < helperTokens.length; i++){
   let bot_client: Discord.Client = new Discord.Client();
