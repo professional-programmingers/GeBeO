@@ -11,7 +11,7 @@ module.exports = class ImageAddCommand extends Commando.Command {
       memberName: 'iadd',
       description: 'Add an image to the bot.',
       argsType: 'single',
-      userPermission: ['ADMINISTRATOR'],
+      userPermissions: ['ADMINISTRATOR'],
       args: [
         {
           key: 'name',

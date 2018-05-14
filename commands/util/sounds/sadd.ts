@@ -11,7 +11,8 @@ module.exports = class SoundAddCommand extends Commando.Command {
       memberName: 'sadd',
       description: 'Add an image to the bot.',
       argsType: 'single',
-      userPermission: ['ADMINISTRATOR'],
+      userPermissions: ['ADMINISTRATOR'],
+      clientPermissions: ['ADMINISTRATOR'],
       args: [
         {
           key: 'name',
