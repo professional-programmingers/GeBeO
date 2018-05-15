@@ -1,0 +1,9 @@
+.git
+.gitignore
+bot.png
+LICENSE
+README.md
+
+tokens
+guilds
+node_modules

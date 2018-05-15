@@ -13,7 +13,7 @@ const client: Commando.CommandoClient = new Commando.CommandoClient({
 });
 
 client.setProvider(
-	sqlite.open(path.join(__dirname, 'database.sqlite3')).then((db: any) => new Commando.SQLiteProvider(db))
+	sqlite.open(path.join(__dirname, 'guilds/database.sqlite3')).then((db: any) => new Commando.SQLiteProvider(db))
 ).catch(console.error);
 
 client.registry
