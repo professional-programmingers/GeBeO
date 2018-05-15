@@ -4,6 +4,11 @@ import * as Commando from 'discord.js-commando';
 import * as fs from 'fs';
 import * as ytdl from 'ytdl-core';
 import {Bot} from 'helpers/bot';
+<<<<<<< HEAD
+=======
+import * as ytdl from 'ytdl-core';
+const youtubedl = require('youtube-dl');
+>>>>>>> 40e7e3cef6215dcb33d8bc34c599c26464b3f5e6
 
 
 enum SoundType {
@@ -23,6 +28,8 @@ interface ChannelQueue {
   channelId: string;
   queue: SoundItem[];
   bot: Bot;
+  playing: SoundItem;
+  dispatcher: Discord.StreamDispatcher;
 }
 
 export class SoundClass {
@@ -78,10 +85,11 @@ export class SoundClass {
     await cQueue.bot.connect(voiceChannelId);
 
     // Pop first sound item from queue and play it.
-    let dispatcher: Discord.StreamDispatcher = cQueue.bot.play(cQueue.queue.shift().rs);
+    cQueue.playing = cQueue.queue.shift();
+    cQueue.dispatcher = cQueue.bot.play(cQueue.playing.rs);
 
     // Setup a callback for when this sound finishes playing.
-    dispatcher.on('end', () => {
+    cQueue.dispatcher.on('end', () => {
       this.playNext(voiceChannelId);
     });
   }
@@ -96,25 +104,30 @@ export class SoundClass {
 
 
   skipSound = (voiceChannel: Discord.VoiceChannel): void => {
-    this.playNext(voiceChannel.id);
+    this.queueDict.get(voiceChannel.id).dispatcher.end();
   }
 
 
   clearQueue = (voiceChannel: Discord.VoiceChannel): void => {
-    this.queueDict.get(voiceChannel.id).queue = []
-    this.playNext(voiceChannel.id);
+    let cQueue: ChannelQueue = this.queueDict.get(voiceChannel.id);
+    if(cQueue.bot) {
+      cQueue.bot.disconnect();
+    }
+    this.queueDict.delete(voiceChannel.id);
   }
 
 
   getQueueMessage = (voiceChannel: Discord.VoiceChannel): string => {
     let message: string = '';
-    let queue: SoundItem[] = this.queueDict.get(voiceChannel.id).queue;
     let counter: number = 1;
-    for (let i = 0; i < queue.length; i++) {
-      if (queue[i]) {
-        message += '#' + counter + ': ' + queue[i].name + '\n';
+    let cQueue: ChannelQueue = this.queueDict.get(voiceChannel.id);
+    message += 'Playing: ' + cQueue.playing.name + '\n';
+    for (let i = 0; i < cQueue.queue.length; i++) {
+      if (cQueue.queue[i]) {
+        message += '#' + counter + ': ' + cQueue.queue[i].name + '\n';
         counter++;  
       }
+      message += '#' + (i + 1) + ': ' + cQueue.queue[i].name + '\n';
     }
     return message;
   }
@@ -145,6 +158,8 @@ export class SoundClass {
         channelId: voiceChannelId,
         queue: soundQueue,
         bot: null,
+        playing: null,
+        dispatcher: null
       }
       this.queueDict.set(voiceChannelId, channelQueue);
       this.playNext(voiceChannelId);

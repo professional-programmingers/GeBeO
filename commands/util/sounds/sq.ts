@@ -20,6 +20,10 @@ module.exports = class SoundGetCommand extends Commando.Command {
         return msg.channel.send('\`\`\`' + Sound.getQueueMessage(msg.member.voiceChannel) + '\`\`\`');
       }
       catch(err) {
+        if (err instanceof TypeError) {
+          return msg.reply('not playing anything in your channel!');
+        }
+        console.log(err);
         return msg.reply(err);
       }
     } else {
