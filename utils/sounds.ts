@@ -3,6 +3,7 @@ import * as Discord from 'discord.js';
 import * as Commando from 'discord.js-commando';
 import * as fs from 'fs';
 import {Bot} from 'helpers/bot';
+import * as ytdl from 'ytdl-core';
 const youtubedl = require('youtube-dl');
 
 
@@ -25,6 +26,8 @@ interface ChannelQueue {
   channelId: string;
   queue: SoundItem[];
   bot: Bot;
+  playing: SoundItem;
+  dispatcher: Discord.StreamDispatcher;
 }
 
 export class SoundClass {
@@ -80,10 +83,11 @@ export class SoundClass {
     await cQueue.bot.connect(voiceChannelId);
 
     // Pop first sound item from queue and play it.
-    let dispatcher: Discord.StreamDispatcher = cQueue.bot.play(cQueue.queue.shift().location);
+    cQueue.playing = cQueue.queue.shift();
+    cQueue.dispatcher = cQueue.bot.play(cQueue.playing.location);
 
     // Setup a callback for when this sound finishes playing.
-    dispatcher.on('end', () => {
+    cQueue.dispatcher.on('end', () => {
       this.playNext(voiceChannelId);
     });
   }
@@ -98,21 +102,25 @@ export class SoundClass {
 
 
   skipSound = (voiceChannel: Discord.VoiceChannel): void => {
-    this.playNext(voiceChannel.id);
+    this.queueDict.get(voiceChannel.id).dispatcher.end();
   }
 
 
   clearQueue = (voiceChannel: Discord.VoiceChannel): void => {
-    this.queueDict.get(voiceChannel.id).queue = []
-    this.playNext(voiceChannel.id);
+    let cQueue: ChannelQueue = this.queueDict.get(voiceChannel.id);
+    if(cQueue.bot) {
+      cQueue.bot.disconnect();
+    }
+    this.queueDict.delete(voiceChannel.id);
   }
 
 
   getQueueMessage = (voiceChannel: Discord.VoiceChannel): string => {
     let message: string = '';
-    let queue: SoundItem[] = this.queueDict.get(voiceChannel.id).queue;
-    for (let i = 0; i < queue.length; i++) {
-      message += '#' + (i + 1) + ': ' + queue[i].name + '\n';
+    let cQueue: ChannelQueue = this.queueDict.get(voiceChannel.id);
+    message += 'Playing: ' + cQueue.playing.name + '\n';
+    for (let i = 0; i < cQueue.queue.length; i++) {
+      message += '#' + (i + 1) + ': ' + cQueue.queue[i].name + '\n';
     }
     return message;
   }
@@ -143,6 +151,8 @@ export class SoundClass {
         channelId: voiceChannelId,
         queue: soundQueue,
         bot: null,
+        playing: null,
+        dispatcher: null
       }
       this.queueDict.set(voiceChannelId, channelQueue);
       this.playNext(voiceChannelId);
