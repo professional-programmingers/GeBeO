@@ -4,11 +4,6 @@ import * as Commando from 'discord.js-commando';
 import * as fs from 'fs';
 import * as ytdl from 'ytdl-core';
 import {Bot} from 'helpers/bot';
-<<<<<<< HEAD
-=======
-import * as ytdl from 'ytdl-core';
-const youtubedl = require('youtube-dl');
->>>>>>> 40e7e3cef6215dcb33d8bc34c599c26464b3f5e6
 
 
 enum SoundType {
