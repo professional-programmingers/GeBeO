@@ -2,22 +2,20 @@ import * as fh from 'helpers/file_helper';
 import * as Discord from 'discord.js';
 import * as Commando from 'discord.js-commando';
 import * as fs from 'fs';
+import * as ytdl from 'ytdl-core';
 import {Bot} from 'helpers/bot';
-const youtubedl = require('youtube-dl');
 
 
 enum SoundType {
-  Link,
+  YouTube,
   File,
 }
 
 class SoundItem {
   constructor(public name: string,
-              public location: string,
+              public rs: any,
               public soundType: SoundType,
               public timestamp?: number) {}
-  // rs contains the sound information. VoiceConnection.playStream will play directly from this.
-  // rs is a ReadableStream. Not typed because it might store youtubedl streams, which has emitters that ReadableStream doesn't have.
 }
 
 interface ChannelQueue {
@@ -80,7 +78,7 @@ export class SoundClass {
     await cQueue.bot.connect(voiceChannelId);
 
     // Pop first sound item from queue and play it.
-    let dispatcher: Discord.StreamDispatcher = cQueue.bot.play(cQueue.queue.shift().location);
+    let dispatcher: Discord.StreamDispatcher = cQueue.bot.play(cQueue.queue.shift().rs);
 
     // Setup a callback for when this sound finishes playing.
     dispatcher.on('end', () => {
@@ -111,8 +109,12 @@ export class SoundClass {
   getQueueMessage = (voiceChannel: Discord.VoiceChannel): string => {
     let message: string = '';
     let queue: SoundItem[] = this.queueDict.get(voiceChannel.id).queue;
+    let counter: number = 1;
     for (let i = 0; i < queue.length; i++) {
-      message += '#' + (i + 1) + ': ' + queue[i].name + '\n';
+      if (queue[i]) {
+        message += '#' + counter + ': ' + queue[i].name + '\n';
+        counter++;  
+      }
     }
     return message;
   }
@@ -153,43 +155,33 @@ export class SoundClass {
 
 
   private parseSoundInput = async (soundInput: string, voiceChannel: Discord.VoiceChannel): Promise<SoundItem> => {
-    /* Parse the sound input into a SoundItem. Returns a SoundItem. */
-    let soundItem: SoundItem = null;
+    let soundItem: SoundItem = new SoundItem(null, null, null);
 
-    let filePath: string = null;
     try {
-      filePath = fh.getFile(soundInput, voiceChannel.guild.id, fh.FileType.Sound);
+      let filePath: string = fh.getFile(soundInput, voiceChannel.guild.id, fh.FileType.Sound);
+      soundItem.rs = fs.createReadStream(filePath) as any;
+      soundItem.name = soundInput;
+      soundItem.soundType = SoundType.File;
+      return soundItem;
     } catch (err) {
       console.log(err);
       // getFile failed, not a file sound.
       // Code continues.
     }
 
-    if (filePath) {
-      soundItem = new SoundItem(soundInput, filePath, SoundType.File);
-      return soundItem;
-    }
-
-    let output: any = null;
+    // Check if is a valid youtube-dl link.
     try {
-      output = await new Promise ((resolve, reject) => {
-        youtubedl.getInfo(soundInput, [], (err: any, jsonOutput: any) => {
-          if (err) throw err;
-          resolve(jsonOutput);
-        });
-      });
+      let info: ytdl.videoInfo = await ytdl.getInfo(soundInput);
+      soundItem.soundType = SoundType.YouTube;
+      soundItem.name = info.title;
+      soundItem.rs = ytdl.downloadFromInfo(info);
+      return soundItem;
     } catch (err) {
-      console.log(err);
       // youtube-dl throws an error.
     }
-
-    if (output) {
-      soundItem = new SoundItem(output.title, output.url, SoundType.Link);
-    }
-
-    return soundItem;
   }
 }
+
 
 
 // Singleton

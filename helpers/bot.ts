@@ -36,9 +36,9 @@ export class Bot {
   }
 
 
-  play = (location: string, timeStamp = 0): Discord.StreamDispatcher => {
+  play = (rs: any, timeStamp = 0): Discord.StreamDispatcher => {
     /* rs is ReadableStream of a sound file. */
-    console.log('loc: ' + location);
-    return this.connection.playArbitraryInput(location, {seek: timeStamp});
+    console.log('rs: ' + rs);
+    return this.connection.playStream(rs, {seek: timeStamp});
   }
 }
