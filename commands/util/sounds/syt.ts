@@ -1,7 +1,7 @@
 import * as Commando from 'discord.js-commando';
 import * as Discord from 'discord.js';
 import * as fs from 'fs';
-import * as fh from 'helpers/file_helper';
+import * as fh from 'utils/file_helper';
 import * as request from 'request';
 import {Sound} from 'utils/sounds';
 

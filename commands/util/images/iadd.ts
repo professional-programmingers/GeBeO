@@ -1,6 +1,6 @@
 import * as Commando from 'discord.js-commando';
 import * as Discord from 'discord.js';
-import * as fh from 'helpers/file_helper';
+import * as fh from 'utils/file_helper';
 
 
 module.exports = class ImageAddCommand extends Commando.Command {

@@ -1,9 +1,9 @@
-import * as fh from 'helpers/file_helper';
 import * as Discord from 'discord.js';
 import * as Commando from 'discord.js-commando';
 import * as fs from 'fs';
 import * as ytdl from 'ytdl-core';
-import {Bot} from 'helpers/bot';
+import * as fh from './file_helper';
+import {Bot} from './bot';
 
 
 enum SoundType {
