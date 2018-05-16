@@ -1,3 +1,4 @@
+tsc
 sudo docker build -t professionalprogrammingers/gebeo .
 sudo docker push professionalprogrammingers/gebeo
 

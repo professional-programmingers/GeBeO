@@ -6,6 +6,4 @@ VOLUME /app/tokens /app/guilds
 
 COPY . /app
 
-RUN npm i
-
-CMD node -r tsconfig-paths/register GeBeO.js
+CMD npm i && node -r tsconfig-paths/register GeBeO.js
