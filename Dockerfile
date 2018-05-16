@@ -8,4 +8,4 @@ COPY . /app
 
 RUN npm i
 
-CMD ['node', '-r', 'tsconfig-register', 'GeBeO.js']
+CMD node -r tsconfig-paths/register GeBeO.js
