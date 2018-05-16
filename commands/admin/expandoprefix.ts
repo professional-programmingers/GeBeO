@@ -4,13 +4,15 @@ import * as Discord from 'discord.js';
 
 module.exports = class ExpandoPrefixCommand extends Commando.Command {
   constructor(client: Commando.CommandoClient) {
-    super(client, {
+    let commandInfo: any = {
       name: 'expandoprefix',
       group: 'admin',
       memberName: 'expandoprefix',
       description: 'Change the prefix of expando channels.',
-      argsType: 'single'
-    })
+      userPermissions: ['ADMINISTRATOR'],
+      argsType: 'single',
+    }
+    super(client, commandInfo);
   }
 
   async run(msg: Commando.CommandMessage, arg: string): Promise<Discord.Message | Discord.Message[]> {

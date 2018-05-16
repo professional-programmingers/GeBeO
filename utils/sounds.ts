@@ -41,9 +41,9 @@ export class SoundClass {
   }
 
 
-  addBot = (client: Discord.Client): void => {
+  addBot = (client: Discord.Client, isMain: boolean): void => {
     /* Add another bot to the bot pool. */
-    this.botPool.push(new Bot(client));
+    this.botPool.push(new Bot(client, isMain));
   }
 
 

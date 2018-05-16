@@ -7,13 +7,16 @@ export class Bot {
   private ready: boolean;
   private channel: Discord.VoiceChannel;
   private connection: Discord.VoiceConnection;
-  constructor(client: Discord.Client){
+  constructor(client: Discord.Client, isMain: boolean){
     this.client = client;
     this.ready = true;
     this.connection = null;
 
     this.client.on('ready', () => {
       console.log(`Helper ready! logged in as ${this.client.user.username}#${this.client.user.discriminator} (${this.client.user.id})`);
+      if (!isMain) {
+        this.client.user.setPresence({status: 'invisible'});
+      }
     });
   }
 

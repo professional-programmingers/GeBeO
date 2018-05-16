@@ -17,13 +17,15 @@ class RoleMsg {
 
 module.exports = class RoleMsgCommand extends Commando.Command {
   constructor(client: Commando.CommandoClient) {
-    super(client, {
+    let commandInfo: any = {
       name: 'rolemsg',
       group: 'admin',
       memberName: 'rolemsg',
       description: 'Create a rolemsg.',
-      argsType: "single"
-    });
+      userPermissions: ['ADMINISTRATOR'],
+      argsType: 'single',
+    }
+    super(client, commandInfo);
 
     client.on('messageReactionAdd', this.roleAdd);
     client.on('messageReactionRemove', this.roleRemove);

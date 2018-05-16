@@ -4,13 +4,15 @@ import * as Discord from 'discord.js';
 
 module.exports = class WedDetectorChannelCommand extends Commando.Command {
   constructor(client: Commando.CommandoClient) {
-    super(client, {
+    let commandInfo: any = {
       name: 'weddetectorchannel',
       group: 'admin',
       memberName: 'weddetectorchannel',
       description: 'Change the channel the wednesday detector posts to.',
-      argsType: 'single'
-    })
+      userPermissions: ['ADMINISTRATOR'],
+      argsType: 'single',
+    }
+    super(client, commandInfo);
   }
 
   async run(msg: Commando.CommandMessage, arg: string): Promise<Discord.Message | Discord.Message[]> {    
