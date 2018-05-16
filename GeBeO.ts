@@ -9,7 +9,8 @@ const sqlite = require('sqlite');
 process.on('unhandledRejection', console.error);
 
 const client: Commando.CommandoClient = new Commando.CommandoClient({
-  owner: ["137429565063692289", "127564963270098944", "167460739764846592"]
+  owner: ["137429565063692289", "127564963270098944", "167460739764846592"],
+  restTimeOffset: 100
 });
 
 client.setProvider(
