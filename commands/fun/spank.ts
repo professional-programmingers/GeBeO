@@ -27,8 +27,8 @@ module.exports = class SpankCommand extends Commando.Command {
 
   async run(msg: Commando.CommandMessage, args: any): Promise<Discord.Message | Discord.Message[]> {
     let spank: Jimp.Jimp = await Jimp.read('./resources/spank.jpg');
-    let spankerLoc: string = args.spanker.displayAvatarURL();
-    let spankedLoc: string = args.spanked.displayAvatarURL();
+    let spankerLoc: string = args.spanker.displayAvatarURL;
+    let spankedLoc: string = args.spanked.displayAvatarURL;
     if (spankerLoc.substring(spankerLoc.length - 4) == "webp") {
       spankerLoc = spankerLoc.slice(0, -4) + "jpg";
     }
