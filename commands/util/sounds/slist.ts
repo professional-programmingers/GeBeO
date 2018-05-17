@@ -18,9 +18,9 @@ module.exports = class SoundListCommand extends Commando.Command {
     msg.delete();
     let fileList: string[] = fh.listFile(msg.guild.id, fh.FileType.Sound);
     if (!fileList.length){
-      return msg.author.send('No files added to this server yet! Add files with !sadd');
+      return msg.author.send('No sounds added to this server yet! Add sounds with !sadd');
     }
-    let message: string = 'Images available:```' + fileList.join('\n') + '```';
+    let message: string = 'Sounds available:```' + fileList.join('\n') + '```';
     return msg.author.send(message);
   }
 }

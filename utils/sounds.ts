@@ -90,14 +90,6 @@ export class SoundClass {
   }
 
 
-  queueSound = (soundInput: string, voiceChannel: Discord.VoiceChannel): void => {
-    /* Places sound in the prequeue, to be queued up internally.*/
-    let soundPromise: Promise<SoundItem> = this.parseSoundInput(soundInput, voiceChannel);
-    this.preQueue.push([soundPromise, voiceChannel.id]);
-    this.queueNext();
-  };
-
-
   skipSound = (voiceChannel: Discord.VoiceChannel): void => {
     this.queueDict.get(voiceChannel.id).dispatcher.end();
   }
@@ -128,6 +120,19 @@ export class SoundClass {
   }
 
 
+  queueSound = async (soundInput: string, voiceChannel: Discord.VoiceChannel): Promise<void> => {
+    /* Places sound in the prequeue, to be queued up internally.*/
+    let soundPromise: Promise<SoundItem> = this.parseSoundInput(soundInput, voiceChannel);
+    this.preQueue.push([soundPromise, voiceChannel.id]);
+    try{
+      await this.queueNext();
+    }
+    catch(err) {
+      throw err;
+    }
+  };
+
+
   private queueNext = async (): Promise<void> => {
     /* Place the requested sound into the channel's queue. */
     if (this.preQueueLocked || this.preQueue.length == 0) {
@@ -137,7 +142,15 @@ export class SoundClass {
     // Locks the prequeue to prevent two instances of this function from happening at the same time.
     this.preQueueLocked = true;
     let [soundPromise, voiceChannelId] = this.preQueue.shift();
-    let soundItem: SoundItem = await soundPromise;
+    let soundItem: SoundItem;
+    try{
+      soundItem = await soundPromise;
+    }
+    catch(err) {
+      // Something happened while parsing the sound input.
+      this.preQueueLocked = false;
+      throw err;
+    }
 
     if (this.queueDict.has(voiceChannelId)){
       // Channel has a queue already.
@@ -188,6 +201,7 @@ export class SoundClass {
       return soundItem;
     } catch (err) {
       // youtube-dl throws an error.
+      throw 'Invalid sound file or link!';
     }
   }
 }
