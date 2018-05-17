@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+set -e
 tsc
 sudo docker build -t professionalprogrammingers/gebeo .
 sudo docker push professionalprogrammingers/gebeo
