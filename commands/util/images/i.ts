@@ -29,6 +29,6 @@ module.exports = class ImageGetCommand extends Commando.Command {
     catch (err) {
       msg.reply(err);
     }
-    return msg.channel.send({file: {attachment: imageAttachment, name: 'file.png'}});
+    return msg.channel.send({file: {attachment: imageAttachment}});
   }
 }

@@ -50,23 +50,16 @@ export function getGuildDir (guildId: string, fileType?: FileType): string {
 }
 
 
-
-let fileExists = function (fileName: string, guildId: string, fileType: FileType): boolean {
-  /* Check if a file exist. Returns bool.*/
-  let guildDir: string = getGuildDir(guildId, fileType);
-  return fs.existsSync(guildDir + sanitizeName(fileName));
-}
-
-
 export function addFile ( attachment: Discord.MessageAttachment, guildId: string, fileName: string, fileType: FileType): void {
   /* Add a file under the correct guild directory*/
   initializeGuild(guildId);
-  if (fileExists(fileName, guildId, fileType)){
+  if (getFile(fileName, guildId, fileType)){
     throw 'File already exists!';
   }
   let guildDir: string = getGuildDir(guildId, fileType);
+  let fileExt: string = attachment.filename.split('.').slice(-1)[0];
 
-  downloadFile(attachment.url, guildDir + sanitizeName(fileName));
+  downloadFile(attachment.url, `${guildDir}${sanitizeName(fileName)}.${fileExt}`);
 }
 
 
@@ -74,23 +67,30 @@ export function listFile (guildId: string, fileType: FileType): string[]{
   /* Returns string[] of file names.*/
   let guildDir: string = getGuildDir(guildId, fileType);
   let files: string[] = fs.readdirSync(guildDir);
+  for(let i = 0; i < files.length; i++){
+    files[i] = files[i].split('.')[0];
+  }
   return files.sort();
 }
 
 export function getFile (fileName: string, guildId: string, fileType: FileType): string {
-  /* Returns the absolute path to the file. */
-  if (fileExists(fileName, guildId, fileType)){
-    return getGuildDir(guildId, fileType) + sanitizeName(fileName);
+  /* Returns the absolute path to the file (with extension). Returns null if nothing.
+   * Can also be used to check if a file exists.
+   * */
+  let guildDir: string = getGuildDir(guildId, fileType);
+  for(let file of fs.readdirSync(guildDir)){
+    if(file.split('.')[0] == sanitizeName(fileName)){
+      return guildDir + file;
+    }
   }
-  else {
-    throw 'File doesn\'t exist.';
-  }
+  return null;
 }
 
 export function removeFile (fileName: string, guildId: string, fileType: FileType): void {
   /* */
-  if (fileExists(fileName, guildId, fileType)){
-    fs.unlinkSync(getGuildDir(guildId, fileType) + sanitizeName(fileName));
+  let file: string = getFile(fileName, guildId, fileType);
+  if (file){
+    fs.unlinkSync(file);
   }
   else {
     throw 'File doesn\'t exist.';
