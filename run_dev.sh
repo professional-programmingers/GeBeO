@@ -1,3 +1,4 @@
+#!/bin/sh
 tsc
 sudo docker kill gebeo
 sudo docker rm gebeo
