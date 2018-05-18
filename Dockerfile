@@ -1,6 +1,6 @@
 FROM node:carbon
 
-RUN apt-get update && apt-get install -y wamerican-insane
+RUN apt-get update && apt-get install -y wamerican-small
 
 WORKDIR /app
 
