@@ -114,7 +114,6 @@ export class SoundClass {
         message += '#' + counter + ': ' + cQueue.queue[i].name + '\n';
         counter++;  
       }
-      message += '#' + (i + 1) + ': ' + cQueue.queue[i].name + '\n';
     }
     return message;
   }
@@ -191,7 +190,6 @@ export class SoundClass {
       soundItem.soundType = SoundType.File;
       return soundItem;
     } catch (err) {
-      console.log(err);
       // getFile failed, not a file sound.
       // Code continues.
     }
