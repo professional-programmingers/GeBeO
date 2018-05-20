@@ -120,10 +120,10 @@ export class SoundClass {
   }
 
 
-  queueSound = async (soundInput: string, voiceChannel: Discord.VoiceChannel): Promise<void> => {
+  queueSound = async (soundInput: string, voiceChannel: Discord.VoiceChannel, next=false): Promise<void> => {
     /* Places sound in the prequeue, to be queued up internally.*/
     let soundPromise: Promise<SoundItem> = this.parseSoundInput(soundInput, voiceChannel);
-    this.preQueue.push([soundPromise, voiceChannel.id]);
+    this.preQueue.push([soundPromise, voiceChannel.id, next]);
     try{
       await this.queueNext();
     }
@@ -141,7 +141,7 @@ export class SoundClass {
     }
     // Locks the prequeue to prevent two instances of this function from happening at the same time.
     this.preQueueLocked = true;
-    let [soundPromise, voiceChannelId] = this.preQueue.shift();
+    let [soundPromise, voiceChannelId, next] = this.preQueue.shift();
     let soundItem: SoundItem;
     try{
       soundItem = await soundPromise;
@@ -154,12 +154,16 @@ export class SoundClass {
 
     if (this.queueDict.has(voiceChannelId)){
       // Channel has a queue already.
-      console.log("Adding sound to an already existing queue.");
-      this.queueDict.get(voiceChannelId).queue.push(soundItem);
+      if(next) {
+        // If sound is being queued for next position.
+        this.queueDict.get(voiceChannelId).queue.unshift(soundItem);
+      }
+      else {
+        this.queueDict.get(voiceChannelId).queue.push(soundItem);
+      }
     }
     else {
       // Channel doesn't already have a queue.
-      console.log("Adding sound to new queue.");
       // Create a new sound queue and channel queue.
       let soundQueue: SoundItem[] = [soundItem];
       let channelQueue: ChannelQueue = {
