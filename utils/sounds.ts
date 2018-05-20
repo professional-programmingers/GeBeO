@@ -47,9 +47,9 @@ export class SoundClass {
   }
 
 
-  private getNextBot = (): Bot => {
+  private getNextBot = (chanId: string): Bot => {
     for(let i = 0; i < this.botPool.length; i++){
-      if(this.botPool[i].isReady()){
+      if(this.botPool[i].isReady() && this.botPool[i].client.channels.get(chanId) != undefined){
         return this.botPool[i];
       }
     }
@@ -72,7 +72,7 @@ export class SoundClass {
     }
     if(!cQueue.bot) {
       // If no bot is already picking up this queue.
-      cQueue.bot = this.getNextBot();
+      cQueue.bot = this.getNextBot(voiceChannelId);
       if(!cQueue.bot) {
         throw 'No bot is available';
       }
