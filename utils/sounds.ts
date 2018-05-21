@@ -90,6 +90,14 @@ export class SoundClass {
   }
 
 
+  chanHasBot = (voiceChannel: Discord.VoiceChannel): boolean => {
+    if (this.queueDict.get(voiceChannel.id)) {
+      return true;
+    }
+    return false;
+  }
+
+
   skipSound = (voiceChannel: Discord.VoiceChannel): void => {
     this.queueDict.get(voiceChannel.id).dispatcher.end();
   }

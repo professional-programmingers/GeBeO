@@ -62,7 +62,7 @@ client.on('raw', async (event: any) => {
   if (event.t == 'MESSAGE_REACTION_REMOVE') client.emit('messageReactionRemove', reaction, user);
 });
 
-let listeners: string[] = ['expando', 'daydetector'];
+let listeners: string[] = ['expando', 'daydetector', 'soundcleanup'];
 
 for (let i = 0; i < listeners.length; i++) {
   const listener: any = require('./listeners/' + listeners[i]);
