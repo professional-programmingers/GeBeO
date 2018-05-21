@@ -15,7 +15,7 @@ class SoundItem {
   constructor(public name: string,
               public rs: any,
               public soundType: SoundType,
-              public timestamp?: number) {}
+              public timeStamp?: number) {}
 }
 
 interface ChannelQueue {
@@ -81,7 +81,7 @@ export class SoundClass {
 
     // Pop first sound item from queue and play it.
     cQueue.playing = cQueue.queue.shift();
-    cQueue.dispatcher = cQueue.bot.play(cQueue.playing.rs);
+    cQueue.dispatcher = cQueue.bot.play(cQueue.playing.rs, cQueue.playing.timeStamp || 0);
 
     // Setup a callback for when this sound finishes playing.
     cQueue.dispatcher.on('end', () => {
@@ -200,11 +200,53 @@ export class SoundClass {
       soundItem.soundType = SoundType.YouTube;
       soundItem.name = info.title;
       soundItem.rs = ytdl.downloadFromInfo(info);
+      try {
+        soundItem.timeStamp = this.parseTimeStamp(soundInput);
+      }
+      catch (err) {
+        console.log("Error with parseTimeStamp:\n" + err.stack);
+        soundItem.timeStamp = 0;
+      }
       return soundItem;
     } catch (err) {
       // youtube-dl throws an error.
       throw 'Invalid sound file or link!';
     }
+  }
+
+
+  private parseTimeStamp = (link: string): number => {
+    /* Parses a youtube link for time stamps.
+     * Returns timestamp in seconds. Returns null if no timestamp was found.
+     * Throws an error if something weird happens during processing.
+     * (e.g. if youtube timestamp format changes)
+     * */
+    let match: any = /(t=|start=).*?(?=&|$)/.exec(link);
+    if(match) {
+      match = match[0];
+    }
+    else {
+      return null;
+    }
+
+    let timeStamp: string = match.split('=')[1].toLowerCase();
+
+    // Two possible timestamp format: 1h1m40s or 3700.
+    let ret: number = 0;
+    if(/h/.test(timeStamp)) {
+      let hour: string;
+      [hour, timeStamp] = timeStamp.split('h');
+      ret += Number(hour) * 3600;
+    }
+    if(/m/.test(timeStamp)) {
+      let minute: string;
+      [minute, timeStamp] = timeStamp.split('m');
+      ret += Number(minute) * 60;
+    }
+    // Remove trailing 's'.
+    timeStamp = timeStamp.replace(/s/, '');
+    ret += Number(timeStamp);
+    return ret;
   }
 }
 
