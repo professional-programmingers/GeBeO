@@ -47,9 +47,10 @@ export class SoundClass {
   }
 
 
-  private getNextBot = (chanId: string): Bot => {
+  private getNextBot = (voiceChannelId: string): Bot => {
     for(let i = 0; i < this.botPool.length; i++){
-      if(this.botPool[i].isReady() && this.botPool[i].client.channels.get(chanId) != undefined){
+      if(!this.botPool[i].isConnected(voiceChannelId) && this.botPool[i].client.channels.get(voiceChannelId) != undefined){
+        // Check whether bot is already used in a guild and whether it's invited to the guild.
         return this.botPool[i];
       }
     }
@@ -64,7 +65,7 @@ export class SoundClass {
       // No more sounds in queue.
       // Potential race condition if another sound gets queued up when code reaches this point.
       if(cQueue.bot) {
-        cQueue.bot.disconnect();
+        cQueue.bot.disconnect(voiceChannelId);
       }
       // Delete this cQueue from the dict.
       this.queueDict.delete(voiceChannelId);
@@ -81,7 +82,7 @@ export class SoundClass {
 
     // Pop first sound item from queue and play it.
     cQueue.playing = cQueue.queue.shift();
-    cQueue.dispatcher = cQueue.bot.play(cQueue.playing.rs, cQueue.playing.timeStamp || 0);
+    cQueue.dispatcher = cQueue.bot.play(voiceChannelId, cQueue.playing.rs, cQueue.playing.timeStamp || 0);
 
     // Setup a callback for when this sound finishes playing.
     cQueue.dispatcher.on('end', () => {
@@ -106,7 +107,7 @@ export class SoundClass {
   clearQueue = (voiceChannel: Discord.VoiceChannel): void => {
     let cQueue: ChannelQueue = this.queueDict.get(voiceChannel.id);
     if(cQueue.bot) {
-      cQueue.bot.disconnect();
+      cQueue.bot.disconnect(voiceChannel.id);
     }
     this.queueDict.delete(voiceChannel.id);
   }

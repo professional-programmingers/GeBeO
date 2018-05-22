@@ -4,13 +4,11 @@ import * as fs from 'fs';
 
 export class Bot {
   public client: Discord.Client;  // TODO: set to private.
-  private ready: boolean;
+  private guildConnected: string[];
   private channel: Discord.VoiceChannel;
-  private connection: Discord.VoiceConnection;
   constructor(client: Discord.Client, isMain: boolean){
     this.client = client;
-    this.ready = true;
-    this.connection = null;
+    this.guildConnected = [];
 
     this.client.on('ready', () => {
       console.log(`Helper ready! logged in as ${this.client.user.username}#${this.client.user.discriminator} (${this.client.user.id})`);
@@ -21,26 +19,30 @@ export class Bot {
   }
 
 
-  isReady = (): boolean => {
-    return this.ready;
+  isConnected = (guildId: string): boolean => {
+    /* Is this bot being used within a guild. */
+    return this.guildConnected.includes(guildId);
   }
 
 
   connect = async (voiceChannelId: string) : Promise<void> => {
     let voiceChannel: Discord.VoiceChannel = this.client.channels.get(voiceChannelId) as Discord.VoiceChannel;
-    this.connection = await voiceChannel.join();
-    this.ready = false;
+    await voiceChannel.join();
+    this.guildConnected.push(voiceChannel.guild.id);
   }
 
 
-  disconnect = (): void => {
-    this.connection.disconnect();
-    this.ready = true;
+  disconnect = (voiceChannelId: string): void => {
+    // Disconnect the bot from the given voiceChannel.
+    let voiceChannel: Discord.VoiceChannel = this.client.channels.get(voiceChannelId) as Discord.VoiceChannel;
+    voiceChannel.connection.disconnect();
+    this.guildConnected.splice(this.guildConnected.indexOf(voiceChannel.guild.id), 1);
   }
 
 
-  play = (rs: any, timeStamp = 0): Discord.StreamDispatcher => {
+  play = (voiceChannelId: string, rs: any, timeStamp = 0): Discord.StreamDispatcher => {
     /* rs is ReadableStream of a sound file. */
-    return this.connection.playStream(rs, {seek: timeStamp});
+    let voiceChannel: Discord.VoiceChannel = this.client.channels.get(voiceChannelId) as Discord.VoiceChannel;
+    return voiceChannel.connection.playStream(rs, {seek: timeStamp});
   }
 }
