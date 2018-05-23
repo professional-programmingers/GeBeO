@@ -1,0 +1,18 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "target": "es6",
+        "module": "commonjs",
+        "moduleResolution": "Node",
+        "noImplicitAny": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "sourceMap": true,
+        "baseUrl": ".",
+        "lib": ["es2016", "dom"]
+    },
+    "exclude": [
+        "node_modules",
+        "**/*.spec.ts"
+    ]
+}
