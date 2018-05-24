@@ -6,9 +6,14 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as request from 'request';
 import * as uuid from 'uuid/v4';
+import * as socketio from 'socket.io';
+import * as http from 'http';
+import * as expresssession from 'express-session';
+import * as sharedsession from 'express-socket.io-session';
 import {Sound} from 'utils/sounds';
+import { httpify } from 'caseless';
 const sqlite = require('sqlite');
-const cookieSession = require('cookie-session');
+const lokistore = require('connect-loki');
 
 
 process.on('unhandledRejection', console.error);
@@ -98,18 +103,39 @@ let tokenStore: Map<string, string> = new Map<string, string>();
 
 const app = express();
 
+let server = http.createServer(app);
+
+let io = socketio(server);
+
+let LokiStore = lokistore(expresssession);
+
+let session = expresssession({
+  store: new LokiStore({}),
+  secret: 'it\'s a secret to everybody',
+  resave: true,
+  saveUninitialized: true
+})
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(cookieSession({
-  secret: 'it\'s a secret to everybody',
+app.use(session);
 
-  // Cookie Options
-  maxAge: 365 * 24 * 60 * 60 * 1000 // 1 year)
-}));
+io.use(sharedsession(session));
+
+io.on('connection', (socket: any) => {
+  console.log('connected');
+  console.log(socket.handshake.session);
+  if (socket.handshake.session.auth_token == undefined) {
+    socket.disconnect(true);
+  }
+  socket.emit('update queue', (data: any) => {
+
+  })
+})
 
 app.get('/', (req: any, res: any) => {
-  if (req.session.id && tokenStore.get(req.session.id)) {
+  if (req.session.auth_token) {
     res.sendFile(path.join(__dirname, '../../dist/client/index.html'));
   } else {
     res.redirect('/login');
@@ -119,11 +145,10 @@ app.get('/', (req: any, res: any) => {
 app.use(express.static('dist/client'));
 
 app.get('/api/queue', (req: any, res: any) => {
-  console.log(tokenStore.get(req.session.id));
   let options: request.Options = {
     url: 'https://discordapp.com/api/v6/users/@me',
     headers: {
-      'Authorization': 'Bearer ' + tokenStore.get(req.session.id)
+      'Authorization': 'Bearer ' + req.session.auth_token
     }
   }
   request.get(options, async (err, resp, body) => {
@@ -159,13 +184,8 @@ app.get('/redirect', (req: any, res: any) => {
   }
   request.post(options, (err, resp: request.Response, body) => {
     if (resp.statusCode == 200) {
-      let id = uuid();
       let objResp = JSON.parse(body);
-      if (req.session.id) {
-        tokenStore.delete(req.session.id);
-      }
-      req.session = {id: id};
-      tokenStore.set(id, objResp.access_token);
+      req.session.auth_token = objResp.access_token;
       res.redirect('/');
     } else {
       res.redirect('/login')
@@ -177,4 +197,4 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../../dist/client/index.html'));
 });
 
-app.listen(80, () => console.log('Example app listening on port 80!'));
+server.listen(80, () => console.log('Example app listening on port 80!'));

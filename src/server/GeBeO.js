@@ -15,10 +15,13 @@ const fs = require("fs");
 const express = require("express");
 const bodyParser = require("body-parser");
 const request = require("request");
-const uuid = require("uuid/v4");
+const socketio = require("socket.io");
+const http = require("http");
+const expresssession = require("express-session");
+const sharedsession = require("express-socket.io-session");
 const sounds_1 = require("utils/sounds");
 const sqlite = require('sqlite');
-const cookieSession = require('cookie-session');
+const lokistore = require('connect-loki');
 process.on('unhandledRejection', console.error);
 const client = new Commando.CommandoClient({
     owner: ["137429565063692289", "127564963270098944", "167460739764846592"],
@@ -81,14 +84,24 @@ if (fs.existsSync('tokens/helper.json')) {
 let secret = fs.readFileSync('tokens/discordsecret.cfg', 'utf8');
 let tokenStore = new Map();
 const app = express();
+let server = http.createServer(app);
+let io = socketio(server);
+let LokiStore = lokistore(expresssession);
+let session = expresssession({
+    store: new LokiStore({}),
+    secret: 'it\'s a secret to everybody',
+    resave: true,
+    saveUninitialized: true
+});
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieSession({
-    secret: 'it\'s a secret to everybody',
-    maxAge: 365 * 24 * 60 * 60 * 1000
-}));
+app.use(session);
+io.use(sharedsession(session));
+io.on('connection', (socket) => {
+    console.log('connected');
+});
 app.get('/', (req, res) => {
-    if (req.session.id && tokenStore.get(req.session.id)) {
+    if (req.session.auth_token) {
         res.sendFile(path.join(__dirname, '../../dist/client/index.html'));
     }
     else {
@@ -97,11 +110,10 @@ app.get('/', (req, res) => {
 });
 app.use(express.static('dist/client'));
 app.get('/api/queue', (req, res) => {
-    console.log(tokenStore.get(req.session.id));
     let options = {
         url: 'https://discordapp.com/api/v6/users/@me',
         headers: {
-            'Authorization': 'Bearer ' + tokenStore.get(req.session.id)
+            'Authorization': 'Bearer ' + req.session.auth_token
         }
     };
     request.get(options, (err, resp, body) => __awaiter(this, void 0, void 0, function* () {
@@ -136,13 +148,8 @@ app.get('/redirect', (req, res) => {
     };
     request.post(options, (err, resp, body) => {
         if (resp.statusCode == 200) {
-            let id = uuid();
             let objResp = JSON.parse(body);
-            if (req.session.id) {
-                tokenStore.delete(req.session.id);
-            }
-            req.session = { id: id };
-            tokenStore.set(id, objResp.access_token);
+            req.session.auth_token = objResp.access_token;
             res.redirect('/');
         }
         else {
@@ -153,5 +160,5 @@ app.get('/redirect', (req, res) => {
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../../dist/client/index.html'));
 });
-app.listen(80, () => console.log('Example app listening on port 80!'));
+server.listen(80, () => console.log('Example app listening on port 80!'));
 //# sourceMappingURL=GeBeO.js.map
