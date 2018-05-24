@@ -91,6 +91,11 @@ export class SoundClass {
   }
 
 
+  getQueueAndPlaying = (voiceChannel: Discord.VoiceChannel): SoundItem[] => {
+    return [this.queueDict.get(voiceChannel.id).playing].concat(this.queueDict.get(voiceChannel.id).queue);
+  }
+
+
   chanHasBot = (voiceChannel: Discord.VoiceChannel): boolean => {
     if (this.queueDict.get(voiceChannel.id)) {
       return true;

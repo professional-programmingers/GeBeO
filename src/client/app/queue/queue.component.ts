@@ -13,10 +13,10 @@ export class QueueComponent implements OnInit {
     private http: HttpClient
   ) { }
 
-  user: string = '';
+  names: string[] = [];
 
   ngOnInit() {
-    this.http.get<{username: string}>('api/user').subscribe(resp => this.user = resp.username);
+    this.http.get<string[]>('api/queue').subscribe(resp => this.names = resp);
   }
 
 }

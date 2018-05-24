@@ -60,6 +60,9 @@ class SoundClass {
                 this.playNext(voiceChannelId);
             });
         });
+        this.getQueueAndPlaying = (voiceChannel) => {
+            return [this.queueDict.get(voiceChannel.id).playing].concat(this.queueDict.get(voiceChannel.id).queue);
+        };
         this.chanHasBot = (voiceChannel) => {
             if (this.queueDict.get(voiceChannel.id)) {
                 return true;

@@ -12,8 +12,13 @@ const Discord = require("discord.js");
 const Commando = require("discord.js-commando");
 const path = require("path");
 const fs = require("fs");
+const express = require("express");
+const bodyParser = require("body-parser");
+const request = require("request");
+const uuid = require("uuid/v4");
 const sounds_1 = require("utils/sounds");
 const sqlite = require('sqlite');
+const cookieSession = require('cookie-session');
 process.on('unhandledRejection', console.error);
 const client = new Commando.CommandoClient({
     owner: ["137429565063692289", "127564963270098944", "167460739764846592"],
@@ -73,4 +78,80 @@ if (fs.existsSync('tokens/helper.json')) {
         sounds_1.Sound.addBot(bot_client, false);
     }
 }
+let secret = fs.readFileSync('tokens/discordsecret.cfg', 'utf8');
+let tokenStore = new Map();
+const app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieSession({
+    secret: 'it\'s a secret to everybody',
+    maxAge: 365 * 24 * 60 * 60 * 1000
+}));
+app.get('/', (req, res) => {
+    if (req.session.id && tokenStore.get(req.session.id)) {
+        res.sendFile(path.join(__dirname, '../../dist/client/index.html'));
+    }
+    else {
+        res.redirect('/login');
+    }
+});
+app.use(express.static('dist/client'));
+app.get('/api/queue', (req, res) => {
+    console.log(tokenStore.get(req.session.id));
+    let options = {
+        url: 'https://discordapp.com/api/v6/users/@me',
+        headers: {
+            'Authorization': 'Bearer ' + tokenStore.get(req.session.id)
+        }
+    };
+    request.get(options, (err, resp, body) => __awaiter(this, void 0, void 0, function* () {
+        console.log(body);
+        if (resp.statusCode == 200) {
+            let objResp = JSON.parse(body);
+            let user = yield client.fetchUser(objResp.id);
+            console.log('user: ' + user.id);
+            let vc;
+            client.guilds.forEach((guild) => {
+                vc = guild.members.get(user.id).voiceChannel;
+            });
+            console.log('vc: ' + vc.id);
+            let nameQueue = [];
+            console.log(sounds_1.Sound);
+            sounds_1.Sound.getQueueAndPlaying(vc).forEach(queue => { nameQueue.push(queue.name); });
+            console.log('queue: ' + nameQueue);
+            res.json(nameQueue);
+        }
+    }));
+});
+app.get('/redirect', (req, res) => {
+    let options = {
+        url: 'https://discordapp.com/api/oauth2/token',
+        qs: {
+            client_id: '331891933066690560',
+            client_secret: secret,
+            grant_type: 'authorization_code',
+            code: req.query.code,
+            redirect_uri: 'http://localhost/redirect'
+        }
+    };
+    request.post(options, (err, resp, body) => {
+        if (resp.statusCode == 200) {
+            let id = uuid();
+            let objResp = JSON.parse(body);
+            if (req.session.id) {
+                tokenStore.delete(req.session.id);
+            }
+            req.session = { id: id };
+            tokenStore.set(id, objResp.access_token);
+            res.redirect('/');
+        }
+        else {
+            res.redirect('/login');
+        }
+    });
+});
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../dist/client/index.html'));
+});
+app.listen(80, () => console.log('Example app listening on port 80!'));
 //# sourceMappingURL=GeBeO.js.map

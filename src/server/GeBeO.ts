@@ -5,11 +5,10 @@ import * as fs from "fs";
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as request from 'request';
-import * as cookieSession from 'cookie-session';
 import * as uuid from 'uuid/v4';
-import * as apiRoute from 'routes/api';
 import {Sound} from 'utils/sounds';
 const sqlite = require('sqlite');
+const cookieSession = require('cookie-session');
 
 
 process.on('unhandledRejection', console.error);
@@ -119,7 +118,7 @@ app.get('/', (req: any, res: any) => {
 
 app.use(express.static('dist/client'));
 
-app.get('/api/user', (req: any, res: any) => {
+app.get('/api/queue', (req: any, res: any) => {
   console.log(tokenStore.get(req.session.id));
   let options: request.Options = {
     url: 'https://discordapp.com/api/v6/users/@me',
@@ -127,15 +126,25 @@ app.get('/api/user', (req: any, res: any) => {
       'Authorization': 'Bearer ' + tokenStore.get(req.session.id)
     }
   }
-  request.get(options, (err, resp, body) => {
+  request.get(options, async (err, resp, body) => {
     console.log(body);
     if (resp.statusCode == 200) {
-      res.json({username: JSON.parse(body).username})
+      let objResp = JSON.parse(body);
+      let user: Discord.User = await client.fetchUser(objResp.id);
+      console.log('user: ' + user.id);
+      let vc: Discord.VoiceChannel;
+      client.guilds.forEach((guild: Discord.Guild) => {
+        vc = guild.members.get(user.id).voiceChannel;
+      })
+      console.log('vc: ' + vc.id);
+      let nameQueue: string[] = [];
+      console.log(Sound);
+      Sound.getQueueAndPlaying(vc).forEach(queue => {nameQueue.push(queue.name)})
+      console.log('queue: ' + nameQueue);
+      res.json(nameQueue);
     }
   })
 })
-
-app.use('/api', apiRoute.router);
 
 app.get('/redirect', (req: any, res: any) => {
   let options = {
