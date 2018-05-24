@@ -3,6 +3,11 @@ import * as Commando from "discord.js-commando";
 import * as path from "path";
 import * as fs from "fs";
 import * as express from 'express';
+import * as bodyParser from 'body-parser';
+import * as request from 'request';
+import * as cookieSession from 'cookie-session';
+import * as uuid from 'uuid/v4';
+import * as apiRoute from 'routes/api';
 import {Sound} from 'utils/sounds';
 const sqlite = require('sqlite');
 
@@ -86,8 +91,81 @@ if(fs.existsSync('tokens/helper.json')){
   }
 }
 
+
+
+let secret: string = fs.readFileSync('tokens/discordsecret.cfg', 'utf8');
+
+let tokenStore: Map<string, string> = new Map<string, string>();
+
 const app = express();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(cookieSession({
+  secret: 'it\'s a secret to everybody',
+
+  // Cookie Options
+  maxAge: 365 * 24 * 60 * 60 * 1000 // 1 year)
+}));
+
+app.get('/', (req: any, res: any) => {
+  if (req.session.id && tokenStore.get(req.session.id)) {
+    res.sendFile(path.join(__dirname, '../../dist/client/index.html'));
+  } else {
+    res.redirect('/login');
+  }
+})
 
 app.use(express.static('dist/client'));
 
-app.listen(3000, () => console.log('Example app listening on port 3000!'));
+app.get('/api/user', (req: any, res: any) => {
+  console.log(tokenStore.get(req.session.id));
+  let options: request.Options = {
+    url: 'https://discordapp.com/api/v6/users/@me',
+    headers: {
+      'Authorization': 'Bearer ' + tokenStore.get(req.session.id)
+    }
+  }
+  request.get(options, (err, resp, body) => {
+    console.log(body);
+    if (resp.statusCode == 200) {
+      res.json({username: JSON.parse(body).username})
+    }
+  })
+})
+
+app.use('/api', apiRoute.router);
+
+app.get('/redirect', (req: any, res: any) => {
+  let options = {
+    url: 'https://discordapp.com/api/oauth2/token',
+    qs: {
+      client_id: '331891933066690560',
+      client_secret: secret,
+      grant_type: 'authorization_code',
+      code: req.query.code,
+      redirect_uri: 'http://localhost/redirect'
+    }
+  }
+  request.post(options, (err, resp: request.Response, body) => {
+    if (resp.statusCode == 200) {
+      let id = uuid();
+      let objResp = JSON.parse(body);
+      if (req.session.id) {
+        tokenStore.delete(req.session.id);
+      }
+      req.session = {id: id};
+      tokenStore.set(id, objResp.access_token);
+      res.redirect('/');
+    } else {
+      res.redirect('/login')
+    }
+  })
+})
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../dist/client/index.html'));
+});
+
+app.listen(80, () => console.log('Example app listening on port 80!'));

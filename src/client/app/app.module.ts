@@ -1,14 +1,34 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
+
+import { MatButtonModule } from '@angular/material';
 
 import { AppComponent } from './app.component';
 
+import { LoginComponent } from './login/login.component';
+import { QueueComponent } from './queue/queue.component';
+
+const appRoutes: Routes = [
+  { path: 'login', component: LoginComponent },
+  { path: '', component: QueueComponent}
+];
+
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    LoginComponent,
+    QueueComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+    RouterModule.forRoot(
+      appRoutes,
+      { enableTracing: true } // <-- debugging purposes only
+    ),
+    MatButtonModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]
