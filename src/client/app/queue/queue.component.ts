@@ -15,12 +15,19 @@ export class QueueComponent implements OnInit {
     private http: HttpClient
   ) { }
 
-  private socket;
+  private socket: SocketIOClient.Socket;
   names: string[] = [];
 
   ngOnInit() {
     this.socket = io.connect('http://localhost');
-    this.http.get<string[]>('api/queue').subscribe(resp => this.names = resp);
+    this.socket.on('update queue', (queue, playing) => {
+      if (queue != null && playing != null) {
+        this.names = [playing];
+        this.names = this.names.concat(queue);  
+      } else {
+        this.names = null;
+      }
+    })
   }
 
 }

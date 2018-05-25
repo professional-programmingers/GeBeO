@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as ytdl from 'ytdl-core';
 import * as fh from './file_helper';
 import {Bot} from './bot';
+import { EventEmitter } from 'events';
 
 
 enum SoundType {
@@ -27,13 +28,14 @@ interface ChannelQueue {
   dispatcher: Discord.StreamDispatcher;
 }
 
-export class SoundClass {
+export class SoundClass extends EventEmitter{
   private botPool: Bot[];
   private queueDict: Map<string, ChannelQueue>;  // dict of ChannelQueues. 
   private preQueue: any[];  // Helps queue up sounds without race conditions.
   private preQueueLocked: boolean;
 
   constructor(){
+    super();
     this.queueDict = new Map();
     this.botPool = [];
     this.preQueue = [];
@@ -62,6 +64,8 @@ export class SoundClass {
     /* Play the next sound in the voice channel. */
     let cQueue: ChannelQueue = this.queueDict.get(voiceChannelId);
     if (cQueue.queue.length == 0) {
+      this.emit('queue update', null, null, voiceChannelId);
+
       // No more sounds in queue.
       // Potential race condition if another sound gets queued up when code reaches this point.
       if(cQueue.bot) {
@@ -83,6 +87,8 @@ export class SoundClass {
     // Pop first sound item from queue and play it.
     cQueue.playing = cQueue.queue.shift();
     cQueue.dispatcher = cQueue.bot.play(voiceChannelId, cQueue.playing.rs, cQueue.playing.timeStamp || 0);
+
+    this.emit('queue update', cQueue.queue, cQueue.playing, cQueue.channelId);
 
     // Setup a callback for when this sound finishes playing.
     cQueue.dispatcher.on('end', () => {
@@ -174,6 +180,8 @@ export class SoundClass {
       else {
         this.queueDict.get(voiceChannelId).queue.push(soundItem);
       }
+
+      this.emit('queue update', this.queueDict.get(voiceChannelId).queue, this.queueDict.get(voiceChannelId).playing, voiceChannelId);
     }
     else {
       // Channel doesn't already have a queue.
@@ -189,6 +197,7 @@ export class SoundClass {
       this.queueDict.set(voiceChannelId, channelQueue);
       this.playNext(voiceChannelId);
     }
+
     this.preQueueLocked = false;
     this.queueNext();
   }

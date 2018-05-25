@@ -123,19 +123,34 @@ app.use(session);
 
 io.use(sharedsession(session));
 
-io.on('connection', (socket: any) => {
-  console.log('connected');
-  console.log(socket.handshake.session);
-  if (socket.handshake.session.auth_token == undefined) {
+io.on('connection', async (socket: any) => {
+  if (socket.handshake.session.discord == undefined) {
     socket.disconnect(true);
   }
-  socket.emit('update queue', (data: any) => {
 
+  let user: Discord.User = await client.fetchUser(socket.handshake.session.discord.user);
+  let vcid: string;
+  client.guilds.forEach((guild: Discord.Guild) => {
+    vcid = guild.members.get(user.id).voiceChannelID;
+  })
+  console.log('vc: ' + vcid);
+
+  Sound.on('queue update', (queue, playing, qvcid) => {
+    if (vcid == qvcid) {
+      if (queue == null && playing == null) {
+        socket.emit('update queue', null, null);
+      }
+      let nameQueue: string[] = [];
+      queue.forEach((sounditem: any) => {
+        nameQueue.push(sounditem.name);
+      })
+      socket.emit('update queue', nameQueue, playing.name);
+    }
   })
 })
 
 app.get('/', (req: any, res: any) => {
-  if (req.session.auth_token) {
+  if (req.session.discord) {
     res.sendFile(path.join(__dirname, '../../dist/client/index.html'));
   } else {
     res.redirect('/login');
@@ -185,8 +200,19 @@ app.get('/redirect', (req: any, res: any) => {
   request.post(options, (err, resp: request.Response, body) => {
     if (resp.statusCode == 200) {
       let objResp = JSON.parse(body);
-      req.session.auth_token = objResp.access_token;
-      res.redirect('/');
+      let options: request.Options = {
+        url: 'https://discordapp.com/api/v6/users/@me',
+        headers: {
+          'Authorization': 'Bearer ' + objResp.access_token
+        }
+      }
+      request.get(options, async (err, resp, body) => {
+        if (resp.statusCode == 200) {
+          let userResp = JSON.parse(body);
+          req.session.discord = {auth: objResp.access_token, user: userResp.id};
+          res.redirect('/');
+        }
+      })    
     } else {
       res.redirect('/login')
     }
