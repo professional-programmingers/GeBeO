@@ -16,18 +16,29 @@ export class QueueComponent implements OnInit {
   ) { }
 
   private socket: SocketIOClient.Socket;
-  names: string[] = [];
+  soundNames: string[] = [];
+  header: string = null;
 
   ngOnInit() {
     this.socket = io.connect('http://localhost');
-    this.socket.on('update queue', (queue, playing) => {
+    this.socket.on('update queue', (queue, playing, vcname) => {
+      console.log('update received');
       if (queue != null && playing != null) {
-        this.names = [playing];
-        this.names = this.names.concat(queue);  
+        this.soundNames = [playing];
+        this.soundNames = this.soundNames.concat(queue);  
       } else {
-        this.names = null;
+        this.soundNames = [];
+      }
+
+      if (vcname == null) {
+        this.header = 'Where you at 👀';
+      } else {
+        if (playing == null) {
+          this.header = 'Chillin in ' + vcname + ' ❄️';
+        } else {
+          this.header = 'Jammin\' out in ' + vcname + ' 🎶'
+        }
       }
     })
   }
-
 }

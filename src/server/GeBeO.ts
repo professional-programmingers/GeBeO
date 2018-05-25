@@ -129,22 +129,64 @@ io.on('connection', async (socket: any) => {
   }
 
   let user: Discord.User = await client.fetchUser(socket.handshake.session.discord.user);
-  let vcid: string;
+  let vcid: string = null;
+  let vcname: string = null;
   client.guilds.forEach((guild: Discord.Guild) => {
-    vcid = guild.members.get(user.id).voiceChannelID;
+    let member = guild.members.get(user.id);
+    if (member) {
+      let vc = member.voiceChannel;
+      if (vc) {
+        vcid = vc.id;
+        vcname = vc.name;
+        return;
+      }
+    }
   })
-  console.log('vc: ' + vcid);
+
+  let queue = Sound.getQueue(vcid);
+  let playing = Sound.getQueue(vcid);
+  if (queue == null && playing == null) {
+    socket.emit('update queue', null, null, vcname);
+  } else {
+    let nameQueue: string[] = [];
+    Sound.getQueue(vcid).forEach((sounditem: any) => {
+      nameQueue.push(sounditem.name);
+    })
+    socket.emit('update queue', nameQueue, Sound.getPlaying(vcid).name, vcname);  
+  }
+
+  client.on('voiceStateUpdate', (oldMember: Discord.GuildMember, newMember: Discord.GuildMember) => {
+    if (oldMember.user == user) {
+      vcid = newMember.voiceChannelID;
+      if (vcid) {
+        vcname = newMember.voiceChannel.name;
+      } else {
+        vcname = null;
+      }
+      let queue = Sound.getQueue(vcid);
+      let playing = Sound.getQueue(vcid);
+      if (queue == null && playing == null) {
+        socket.emit('update queue', null, null, vcname);
+      } else {
+        let nameQueue: string[] = [];
+        Sound.getQueue(vcid).forEach((sounditem: any) => {
+          nameQueue.push(sounditem.name);
+        })
+        socket.emit('update queue', nameQueue, Sound.getPlaying(vcid).name, vcname);  
+      }
+    }
+  })
 
   Sound.on('queue update', (queue, playing, qvcid) => {
     if (vcid == qvcid) {
       if (queue == null && playing == null) {
-        socket.emit('update queue', null, null);
+        socket.emit('update queue', null, null, vcname);
       }
       let nameQueue: string[] = [];
       queue.forEach((sounditem: any) => {
         nameQueue.push(sounditem.name);
       })
-      socket.emit('update queue', nameQueue, playing.name);
+      socket.emit('update queue', nameQueue, playing.name, vcname);
     }
   })
 })
@@ -158,33 +200,6 @@ app.get('/', (req: any, res: any) => {
 })
 
 app.use(express.static('dist/client'));
-
-app.get('/api/queue', (req: any, res: any) => {
-  let options: request.Options = {
-    url: 'https://discordapp.com/api/v6/users/@me',
-    headers: {
-      'Authorization': 'Bearer ' + req.session.auth_token
-    }
-  }
-  request.get(options, async (err, resp, body) => {
-    console.log(body);
-    if (resp.statusCode == 200) {
-      let objResp = JSON.parse(body);
-      let user: Discord.User = await client.fetchUser(objResp.id);
-      console.log('user: ' + user.id);
-      let vc: Discord.VoiceChannel;
-      client.guilds.forEach((guild: Discord.Guild) => {
-        vc = guild.members.get(user.id).voiceChannel;
-      })
-      console.log('vc: ' + vc.id);
-      let nameQueue: string[] = [];
-      console.log(Sound);
-      Sound.getQueueAndPlaying(vc).forEach(queue => {nameQueue.push(queue.name)})
-      console.log('queue: ' + nameQueue);
-      res.json(nameQueue);
-    }
-  })
-})
 
 app.get('/redirect', (req: any, res: any) => {
   let options = {
@@ -209,7 +224,7 @@ app.get('/redirect', (req: any, res: any) => {
       request.get(options, async (err, resp, body) => {
         if (resp.statusCode == 200) {
           let userResp = JSON.parse(body);
-          req.session.discord = {auth: objResp.access_token, user: userResp.id};
+          req.session.discord = {auth: objResp.access_token, user: userResp.id, refresh: objResp.refresh_token};
           res.redirect('/');
         }
       })    

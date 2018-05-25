@@ -1,3 +1,11 @@
-<li *ngFor="let name of names">
-    {{name}}
-</li>
+<mat-toolbar color="primary">
+    <mat-toolbar-row>
+        {{header}}
+    </mat-toolbar-row>
+</mat-toolbar>    
+
+<mat-list>
+    <mat-list-item *ngFor="let name of soundNames; let i = index">
+        <p style="width: 40px">{{i + 1}}</p>{{name}}
+    </mat-list-item>
+</mat-list>

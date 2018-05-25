@@ -97,8 +97,23 @@ export class SoundClass extends EventEmitter{
   }
 
 
-  getQueueAndPlaying = (voiceChannel: Discord.VoiceChannel): SoundItem[] => {
-    return [this.queueDict.get(voiceChannel.id).playing].concat(this.queueDict.get(voiceChannel.id).queue);
+  getQueue = (voiceChannelID: string): SoundItem[] => {
+    let cQueue = this.queueDict.get(voiceChannelID);
+    if (cQueue) {
+      return cQueue.queue;
+    } else {
+      return null;
+    }
+  }
+
+
+  getPlaying = (voiceChannelID: string): SoundItem => {
+    let cQueue = this.queueDict.get(voiceChannelID);
+    if (cQueue) {
+      return cQueue.playing;
+    } else {
+      return null;
+    }
   }
 
 
@@ -121,6 +136,7 @@ export class SoundClass extends EventEmitter{
       cQueue.bot.disconnect(voiceChannel.id);
     }
     this.queueDict.delete(voiceChannel.id);
+    this.emit('queue update', null, null, voiceChannel.id);
   }
 
 
