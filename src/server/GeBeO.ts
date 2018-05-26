@@ -110,7 +110,9 @@ let io = socketio(server);
 let LokiStore = lokistore(expresssession);
 
 let session = expresssession({
-  store: new LokiStore({}),
+  store: new LokiStore({
+    path: './guilds/session-store.db'
+  }),
   secret: 'it\'s a secret to everybody',
   resave: true,
   saveUninitialized: true,
@@ -256,4 +258,4 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../../dist/client/index.html'));
 });
 
-server.listen(80, () => console.log('Example app listening on port 80!'));
+server.listen(8080, '0.0.0.0', () => console.log('Example app listening on port 80!'));
