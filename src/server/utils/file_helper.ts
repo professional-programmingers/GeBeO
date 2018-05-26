@@ -21,11 +21,11 @@ let sanitizeName = function (fileName: string) {
 
 export function initializeGuild (guildId: string): void {
   /* Check if a guild exists, initialize it if it doesn't.*/
-  if (!fs.existsSync(__rootDir + '/guilds/')) {
-    fs.mkdirSync(__rootDir + '/guilds/');
+  if (!fs.existsSync(__rootDir + '/../../guilds/')) {
+    fs.mkdirSync(__rootDir + '/../../guilds/');
   }
 
-  let guildDir: string = `${__rootDir}/guilds/guild-${guildId}`;
+  let guildDir: string = `${__rootDir}/../../guilds/guild-${guildId}`;
   if (!fs.existsSync(guildDir)) {
     fs.mkdirSync(guildDir);
     fs.mkdirSync(guildDir + '/images');
@@ -35,7 +35,7 @@ export function initializeGuild (guildId: string): void {
 
 
 export function getGuildDir (guildId: string, fileType?: FileType): string {
-  let guildDir: string = `${__rootDir}/guilds/guild-${guildId}`;
+  let guildDir: string = `${__rootDir}/../../guilds/guild-${guildId}`;
   if (fileType != undefined) {
     if (fileType == FileType.Image) {
       guildDir += '/images/';

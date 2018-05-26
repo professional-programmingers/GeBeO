@@ -27,7 +27,7 @@ export class QueueComponent implements OnInit {
   skipButtonText: string = 'Skip';
 
   ngOnInit() {
-    this.socket = io.connect('http://localhost');
+    this.socket = io.connect('http://gebeo.jmalexan.com');
     this.socket.on('update queue', (queue, playing, vcname) => {
       this.clearButtonColor = 'primary';
       this.clearButtonText = 'Clear All';

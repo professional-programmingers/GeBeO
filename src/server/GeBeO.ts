@@ -98,8 +98,10 @@ if(fs.existsSync('tokens/helper.json')){
 
 
 let secret: string = fs.readFileSync('tokens/discordsecret.cfg', 'utf8');
+secret = secret.replace(/\s/g, '');
 
-let tokenStore: Map<string, string> = new Map<string, string>();
+let clientid: string = fs.readFileSync('tokens/discordclient.cfg', 'utf8');
+clientid = clientid.replace(/\s/g, '');
 
 const app = express();
 
@@ -185,7 +187,7 @@ io.on('connection', async (socket: any) => {
   })
 
   Sound.on('queue update', (queue, playing, qvcid) => {
-    if (vc.id == qvcid) {
+    if (vc && vc.id == qvcid) {
       if (queue == null && playing == null) {
         socket.emit('update queue', null, null, vc.name || null);
         return;
@@ -215,24 +217,35 @@ app.get('/', (req: any, res: any) => {
   if (req.session.discord) {
     res.sendFile(path.join(__dirname, '../../dist/client/index.html'));
   } else {
-    res.redirect('/login');
+    res.redirect('/login?clientid=' + clientid);
+  }
+})
+
+app.get('/login', (req: any, res: any) => {
+  if (req.query.clientid != clientid) {
+    res.redirect('/login?clientid=' + clientid);
+  } else {
+    res.sendFile(path.join(__dirname, '../../dist/client/index.html'));
   }
 })
 
 app.use(express.static('dist/client'));
 
 app.get('/redirect', (req: any, res: any) => {
+  console.log(req.headers);
   let options = {
     url: 'https://discordapp.com/api/oauth2/token',
     qs: {
-      client_id: '331891933066690560',
+      client_id: clientid,
       client_secret: secret,
       grant_type: 'authorization_code',
       code: req.query.code,
-      redirect_uri: 'http://localhost/redirect'
+      redirect_uri: req.protocol + '://' + req.get('host') + '/redirect'
     }
   }
+  console.log(options);
   request.post(options, (err, resp: request.Response, body) => {
+    console.log(body);
     if (resp.statusCode == 200) {
       let objResp = JSON.parse(body);
       let options: request.Options = {
