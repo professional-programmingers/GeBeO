@@ -113,7 +113,10 @@ let session = expresssession({
   store: new LokiStore({}),
   secret: 'it\'s a secret to everybody',
   resave: true,
-  saveUninitialized: true
+  saveUninitialized: true,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 365
+  }
 })
 
 app.use(bodyParser.json());
@@ -129,65 +132,80 @@ io.on('connection', async (socket: any) => {
   }
 
   let user: Discord.User = await client.fetchUser(socket.handshake.session.discord.user);
-  let vcid: string = null;
-  let vcname: string = null;
+  let vc: Discord.VoiceChannel = null;
   client.guilds.forEach((guild: Discord.Guild) => {
     let member = guild.members.get(user.id);
     if (member) {
-      let vc = member.voiceChannel;
-      if (vc) {
-        vcid = vc.id;
-        vcname = vc.name;
+      let currVc = member.voiceChannel;
+      if (currVc) {
+        vc = currVc;
         return;
       }
     }
   })
 
-  let queue = Sound.getQueue(vcid);
-  let playing = Sound.getQueue(vcid);
-  if (queue == null && playing == null) {
-    socket.emit('update queue', null, null, vcname);
+  if (vc) {
+    let queue = Sound.getQueue(vc.id);
+    let playing = Sound.getPlaying(vc.id);
+    if (queue == null && playing == null) {
+      socket.emit('update queue', null, null, vc.name);
+    } else {
+      let nameQueue: string[] = [];
+      Sound.getQueue(vc.id).forEach((sounditem: any) => {
+        nameQueue.push(sounditem.name);
+      })
+      socket.emit('update queue', nameQueue, Sound.getPlaying(vc.id).name, vc.name);  
+    }  
   } else {
-    let nameQueue: string[] = [];
-    Sound.getQueue(vcid).forEach((sounditem: any) => {
-      nameQueue.push(sounditem.name);
-    })
-    socket.emit('update queue', nameQueue, Sound.getPlaying(vcid).name, vcname);  
+    socket.emit('update queue', null, null, null);
   }
+
 
   client.on('voiceStateUpdate', (oldMember: Discord.GuildMember, newMember: Discord.GuildMember) => {
     if (oldMember.user == user) {
-      vcid = newMember.voiceChannelID;
-      if (vcid) {
-        vcname = newMember.voiceChannel.name;
-      } else {
-        vcname = null;
+      vc = newMember.voiceChannel;
+      if (vc == null) {
+        socket.emit('update queue', null, null, null);
+        return;
       }
-      let queue = Sound.getQueue(vcid);
-      let playing = Sound.getQueue(vcid);
+      let queue = Sound.getQueue(vc.id);
+      let playing = Sound.getQueue(vc.id);
       if (queue == null && playing == null) {
-        socket.emit('update queue', null, null, vcname);
+        socket.emit('update queue', null, null, vc.name);
       } else {
         let nameQueue: string[] = [];
-        Sound.getQueue(vcid).forEach((sounditem: any) => {
+        Sound.getQueue(vc.id).forEach((sounditem: any) => {
           nameQueue.push(sounditem.name);
         })
-        socket.emit('update queue', nameQueue, Sound.getPlaying(vcid).name, vcname);  
+        socket.emit('update queue', nameQueue, Sound.getPlaying(vc.id).name, vc.name || null);  
       }
     }
   })
 
   Sound.on('queue update', (queue, playing, qvcid) => {
-    if (vcid == qvcid) {
+    if (vc.id == qvcid) {
       if (queue == null && playing == null) {
-        socket.emit('update queue', null, null, vcname);
+        socket.emit('update queue', null, null, vc.name || null);
+        return;
       }
       let nameQueue: string[] = [];
       queue.forEach((sounditem: any) => {
         nameQueue.push(sounditem.name);
       })
-      socket.emit('update queue', nameQueue, playing.name, vcname);
+      socket.emit('update queue', nameQueue, playing.name, vc.name || null);
     }
+  })
+
+  socket.on('queue sound', (sound: string, next: boolean) => {
+    Sound.queueSound(sound, vc, next);
+  })
+
+  socket.on('skip sound', () => {
+    Sound.skipSound(vc);
+  })
+
+  socket.on('clear all', () => {
+    Sound.clearQueue(vc);
   })
 })
 

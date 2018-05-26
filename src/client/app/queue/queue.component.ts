@@ -16,23 +16,37 @@ export class QueueComponent implements OnInit {
   ) { }
 
   private socket: SocketIOClient.Socket;
-  soundNames: string[] = [];
+  sound: string = '';
+  nowPlaying: string = null;
+  queue: string[] = [];
   header: string = null;
+  inVc: boolean = false;
+  clearButtonColor: string = 'primary';
+  clearButtonText: string = 'Clear All';
+  skipButtonColor: string = 'primary';
+  skipButtonText: string = 'Skip';
 
   ngOnInit() {
     this.socket = io.connect('http://localhost');
     this.socket.on('update queue', (queue, playing, vcname) => {
-      console.log('update received');
+      this.clearButtonColor = 'primary';
+      this.clearButtonText = 'Clear All';
+      this.skipButtonColor = 'primary';
+      this.skipButtonText = 'Skip';
       if (queue != null && playing != null) {
-        this.soundNames = [playing];
-        this.soundNames = this.soundNames.concat(queue);  
+        this.nowPlaying = playing;
+        this.queue = queue;
       } else {
-        this.soundNames = [];
+        this.nowPlaying = null;
+        this.queue = [];
       }
 
       if (vcname == null) {
+        this.inVc = false;
         this.header = 'Where you at 👀';
+        this.sound = '';
       } else {
+        this.inVc = true;
         if (playing == null) {
           this.header = 'Chillin in ' + vcname + ' ❄️';
         } else {
@@ -40,5 +54,37 @@ export class QueueComponent implements OnInit {
         }
       }
     })
+  }
+
+  addToQueue() {
+    this.socket.emit('queue sound', this.sound, false);
+    this.sound = '';
+  }
+
+  queueNext() {
+    this.socket.emit('queue sound', this.sound, true);
+    this.sound = '';
+  }
+
+  skipSound() {
+    if (this.skipButtonColor == 'primary') {
+      this.skipButtonColor = 'warn';
+      this.skipButtonText = 'Are you sure?';
+    } else {
+      this.skipButtonColor = 'primary';
+      this.skipButtonText = 'Skip';
+      this.socket.emit('skip sound');
+    }
+  }
+
+  clearAll() {
+    if (this.clearButtonColor == 'primary') {
+      this.clearButtonColor = 'warn';
+      this.clearButtonText = 'Are you sure?';
+    } else {
+      this.clearButtonColor = 'primary';
+      this.clearButtonText = 'Clear All';
+      this.socket.emit('clear all');
+    }
   }
 }

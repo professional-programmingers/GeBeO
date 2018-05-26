@@ -2,10 +2,24 @@
     <mat-toolbar-row>
         {{header}}
     </mat-toolbar-row>
-</mat-toolbar>    
+</mat-toolbar>
+
+<form class="soundInput" autocomplete="off">
+    <mat-form-field class="soundInputBox">
+        <input matInput placeholder="Sound to queue" [disabled]="!inVc" [(ngModel)]="sound" name="sound" autocomplete="off">
+    </mat-form-field> 
+    <button mat-raised-button color="primary" class="soundInputButton" [disabled]="!inVc" (click)="addToQueue()">Queue</button>
+    <button mat-raised-button color="primary" class="soundInputButton" [disabled]="!inVc" (click)="queueNext()">Play Next</button>
+</form>
 
 <mat-list>
-    <mat-list-item *ngFor="let name of soundNames; let i = index">
-        <p style="width: 40px">{{i + 1}}</p>{{name}}
+    <mat-list-item *ngIf="nowPlaying" class="nowPlayingItem">
+        <mat-icon mat-list-icon>play_arrow</mat-icon>
+        <p class="nowPlayingText">{{nowPlaying}}</p>
+        <button mat-raised-button class="nowPlayingButton" [color]="skipButtonColor" class="nowPlayingButton" (click)="skipSound()">{{skipButtonText}}</button>
+        <button mat-raised-button class="nowPlayingButton" [color]="clearButtonColor" class="nowPlayingButton" (click)="clearAll()">{{clearButtonText}}</button>
+    </mat-list-item>
+    <mat-list-item *ngFor="let name of queue; let i = index">
+        <p style="width: 24px; padding: 4px; text-align: center">{{i + 1}}</p>{{name}}
     </mat-list-item>
 </mat-list>
