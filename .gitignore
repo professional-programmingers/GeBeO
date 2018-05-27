@@ -61,3 +61,4 @@ src/server/commands/fun/*.js
 src/server/commands/util/*.js
 src/server/commands/util/images/*.js
 src/server/commands/util/sounds/*.js
+src/server/temp/

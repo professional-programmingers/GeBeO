@@ -51,7 +51,9 @@
     "rxjs": "^6.0.0",
     "socket.io": "^2.1.1",
     "sqlite": "^2.9.1",
+    "tsconfig-paths": "^3.3.2",
     "uuid": "^3.2.1",
+    "watson-developer-cloud": "^3.4.2",
     "word-definition": "^2.1.6",
     "ytdl-core": "^0.20.4",
     "zone.js": "^0.8.26"

@@ -114,7 +114,7 @@ export class _Sound extends EventEmitter{
   clearQueue = (voiceChannel: Discord.VoiceChannel): void => {
     let cQueue: ChannelQueue = this.queueDict.get(voiceChannel.id);
     if(cQueue.bot) {
-      cQueue.bot.disconnect(voiceChannel.id);
+      cQueue.bot.forceDisconnect(voiceChannel.id);
     }
     this.queueDict.delete(voiceChannel.id);
     this.emit('queue update', null, null, voiceChannel.id);
