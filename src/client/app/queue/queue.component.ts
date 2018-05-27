@@ -43,14 +43,14 @@ export class QueueComponent implements OnInit {
 
       if (vcname == null) {
         this.inVc = false;
-        this.header = 'Where you at 👀';
+        this.header = '👀 Where you at';
         this.sound = '';
       } else {
         this.inVc = true;
         if (playing == null) {
-          this.header = 'Chillin in ' + vcname + ' ❄️';
+          this.header = '❄️ Chillin in ' + vcname;
         } else {
-          this.header = 'Jammin\' out in ' + vcname + ' 🎶'
+          this.header = '🎶 Jammin\' out in ' + vcname;
         }
       }
     })
