@@ -10,6 +10,7 @@ import * as socketio from 'socket.io';
 import * as http from 'http';
 import * as expresssession from 'express-session';
 import * as sharedsession from 'express-socket.io-session';
+import {BotPool} from 'utils/bot';
 import {Sound} from 'utils/sounds';
 import { httpify } from 'caseless';
 const sqlite = require('sqlite');
@@ -84,14 +85,14 @@ let token: string = fs.readFileSync('tokens/discord.cfg', 'utf8');
 token = token.replace(/\s/g, '');
 client.login(token);
 
-Sound.addBot(client as Discord.Client, true);
+BotPool.addBot(client as Discord.Client, true);
 
 if(fs.existsSync('tokens/helper.json')){
   let helperTokens: string[] = JSON.parse(fs.readFileSync('tokens/helper.json', 'utf8'));
   for(let i = 0; i < helperTokens.length; i++){
     let bot_client: Discord.Client = new Discord.Client();
     bot_client.login(helperTokens[i]);
-    Sound.addBot(bot_client, false);
+    BotPool.addBot(bot_client, false);
   }
 }
 

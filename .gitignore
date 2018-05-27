@@ -42,6 +42,8 @@ tokens
 guilds
 session-store.db
 
+*.*swp
+
 src/server/*.js.map
 src/server/utils/*.js.map
 src/server/listeners/*.js.map

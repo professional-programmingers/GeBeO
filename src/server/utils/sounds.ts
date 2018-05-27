@@ -3,7 +3,7 @@ import * as Commando from 'discord.js-commando';
 import * as fs from 'fs';
 import * as ytdl from 'ytdl-core';
 import * as fh from './file_helper';
-import {Bot} from './bot';
+import {Bot, BotPool} from './bot';
 import { EventEmitter } from 'events';
 
 
@@ -21,15 +21,14 @@ class SoundItem {
 
 interface ChannelQueue {
   /* Represents a voice channel and its queue.*/
-  channelId: string;
+  voiceChannel: Discord.VoiceChannel;
   queue: SoundItem[];
   bot: Bot;
   playing: SoundItem;
   dispatcher: Discord.StreamDispatcher;
 }
 
-export class SoundClass extends EventEmitter{
-  private botPool: Bot[];
+export class _Sound extends EventEmitter{
   private queueDict: Map<string, ChannelQueue>;  // dict of ChannelQueues. 
   private preQueue: any[];  // Helps queue up sounds without race conditions.
   private preQueueLocked: boolean;
@@ -37,62 +36,44 @@ export class SoundClass extends EventEmitter{
   constructor(){
     super();
     this.queueDict = new Map();
-    this.botPool = [];
     this.preQueue = [];
     this.preQueueLocked = false;
   }
 
 
-  addBot = (client: Discord.Client, isMain: boolean): void => {
-    /* Add another bot to the bot pool. */
-    this.botPool.push(new Bot(client, isMain));
-  }
-
-
-  private getNextBot = (voiceChannelId: string): Bot => {
-    for(let i = 0; i < this.botPool.length; i++){
-      if(!this.botPool[i].isConnected(voiceChannelId) && this.botPool[i].client.channels.get(voiceChannelId) != undefined){
-        // Check whether bot is already used in a guild and whether it's invited to the guild.
-        return this.botPool[i];
-      }
-    }
-    return null;
-  }
-
-
-  private playNext = async (voiceChannelId: string): Promise<void> => {
+  private playNext = async (voiceChannel: Discord.VoiceChannel): Promise<void> => {
     /* Play the next sound in the voice channel. */
-    let cQueue: ChannelQueue = this.queueDict.get(voiceChannelId);
+    let cQueue: ChannelQueue = this.queueDict.get(voiceChannel.id);
     if (cQueue.queue.length == 0) {
-      this.emit('queue update', null, null, voiceChannelId);
+      this.emit('queue update', null, null, voiceChannel.id);
 
       // No more sounds in queue.
       // Potential race condition if another sound gets queued up when code reaches this point.
       if(cQueue.bot) {
-        cQueue.bot.disconnect(voiceChannelId);
+        cQueue.bot.disconnect(voiceChannel.id);
       }
       // Delete this cQueue from the dict.
-      this.queueDict.delete(voiceChannelId);
+      this.queueDict.delete(voiceChannel.id);
       return;
     }
     if(!cQueue.bot) {
       // If no bot is already picking up this queue.
-      cQueue.bot = this.getNextBot(voiceChannelId);
+      cQueue.bot = BotPool.getNextBot(voiceChannel);
       if(!cQueue.bot) {
         throw 'No bot is available';
       }
     }
-    await cQueue.bot.connect(voiceChannelId);
+    await cQueue.bot.connect(voiceChannel.id);
 
     // Pop first sound item from queue and play it.
     cQueue.playing = cQueue.queue.shift();
-    cQueue.dispatcher = cQueue.bot.play(voiceChannelId, cQueue.playing.rs, cQueue.playing.timeStamp || 0);
+    cQueue.dispatcher = cQueue.bot.play(voiceChannel.id, cQueue.playing.rs, cQueue.playing.timeStamp || 0);
 
-    this.emit('queue update', cQueue.queue, cQueue.playing, cQueue.channelId);
+    this.emit('queue update', cQueue.queue, cQueue.playing, cQueue.voiceChannel.id);
 
     // Setup a callback for when this sound finishes playing.
     cQueue.dispatcher.on('end', () => {
-      this.playNext(voiceChannelId);
+      this.playNext(voiceChannel);
     });
   }
 
@@ -158,7 +139,7 @@ export class SoundClass extends EventEmitter{
   queueSound = async (soundInput: string, voiceChannel: Discord.VoiceChannel, next=false): Promise<void> => {
     /* Places sound in the prequeue, to be queued up internally.*/
     let soundPromise: Promise<SoundItem> = this.parseSoundInput(soundInput, voiceChannel);
-    this.preQueue.push([soundPromise, voiceChannel.id, next]);
+    this.preQueue.push([soundPromise, voiceChannel, next]);
     try{
       await this.queueNext();
     }
@@ -176,7 +157,7 @@ export class SoundClass extends EventEmitter{
     }
     // Locks the prequeue to prevent two instances of this function from happening at the same time.
     this.preQueueLocked = true;
-    let [soundPromise, voiceChannelId, next] = this.preQueue.shift();
+    let [soundPromise, voiceChannel, next] = this.preQueue.shift();
     let soundItem: SoundItem;
     try{
       soundItem = await soundPromise;
@@ -187,31 +168,31 @@ export class SoundClass extends EventEmitter{
       throw err;
     }
 
-    if (this.queueDict.has(voiceChannelId)){
+    if (this.queueDict.has(voiceChannel.id)){
       // Channel has a queue already.
       if(next) {
         // If sound is being queued for next position.
-        this.queueDict.get(voiceChannelId).queue.unshift(soundItem);
+        this.queueDict.get(voiceChannel.id).queue.unshift(soundItem);
       }
       else {
-        this.queueDict.get(voiceChannelId).queue.push(soundItem);
+        this.queueDict.get(voiceChannel.id).queue.push(soundItem);
       }
 
-      this.emit('queue update', this.queueDict.get(voiceChannelId).queue, this.queueDict.get(voiceChannelId).playing, voiceChannelId);
+      this.emit('queue update', this.queueDict.get(voiceChannel.id).queue, this.queueDict.get(voiceChannel.id).playing, voiceChannel.id);
     }
     else {
       // Channel doesn't already have a queue.
       // Create a new sound queue and channel queue.
       let soundQueue: SoundItem[] = [soundItem];
       let channelQueue: ChannelQueue = {
-        channelId: voiceChannelId,
+        voiceChannel: voiceChannel,
         queue: soundQueue,
         bot: null,
         playing: null,
         dispatcher: null
       }
-      this.queueDict.set(voiceChannelId, channelQueue);
-      this.playNext(voiceChannelId);
+      this.queueDict.set(voiceChannel.id, channelQueue);
+      this.playNext(voiceChannel);
     }
 
     this.preQueueLocked = false;
@@ -292,4 +273,4 @@ export class SoundClass extends EventEmitter{
 
 
 // Singleton
-export let Sound: SoundClass = new SoundClass();
+export let Sound: _Sound = new _Sound();
