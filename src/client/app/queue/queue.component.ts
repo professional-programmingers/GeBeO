@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 import * as io from 'socket.io-client';
 
@@ -18,16 +18,19 @@ export class QueueComponent implements OnInit {
   private socket: SocketIOClient.Socket;
   sound: string = '';
   nowPlaying: string = null;
-  queue: string[] = [];
+  queue: string[] = null;
   header: string = null;
   inVc: boolean = false;
   clearButtonColor: string = 'primary';
   clearButtonText: string = 'Clear All';
   skipButtonColor: string = 'primary';
   skipButtonText: string = 'Skip';
+  ytSearchEnabled: boolean = false;
+  inputPlaceholder: string = 'Sound to queue';
+  videos: any = null;
 
   ngOnInit() {
-    this.socket = io.connect('http://gebeo.jmalexan.com');
+    this.socket = io.connect(window.location.origin);
     this.socket.on('update queue', (queue, playing, vcname) => {
       this.clearButtonColor = 'primary';
       this.clearButtonText = 'Clear All';
@@ -38,7 +41,7 @@ export class QueueComponent implements OnInit {
         this.queue = queue;
       } else {
         this.nowPlaying = null;
-        this.queue = [];
+        this.queue = null;
       }
 
       if (vcname == null) {
@@ -66,6 +69,16 @@ export class QueueComponent implements OnInit {
     this.sound = '';
   }
 
+  addYtToQueue(url: string) {
+    this.socket.emit('queue sound', url, false);
+    this.videos = null;
+  }
+
+  queueYtNext(url: string) {
+    this.socket.emit('queue sound', url, true);
+    this.videos = null;
+  }
+
   skipSound() {
     if (this.skipButtonColor == 'primary') {
       this.skipButtonColor = 'warn';
@@ -86,5 +99,29 @@ export class QueueComponent implements OnInit {
       this.clearButtonText = 'Clear All';
       this.socket.emit('clear all');
     }
+  }
+
+  updateYtSearch() {
+    console.log(this.ytSearchEnabled);
+    if (this.ytSearchEnabled) {
+      this.inputPlaceholder = 'What to search for';
+    } else {
+      this.videos = null;
+      this.inputPlaceholder = 'Sound to queue';
+    }
+  }
+
+  searchYt() {
+    this.http.get('/api/ytget', {
+      params: new HttpParams({
+        fromObject: {search: this.sound}
+      })
+    }).subscribe(videos => {
+      this.videos = videos;
+    });
+  }
+
+  queueYt(url: string) {
+
   }
 }

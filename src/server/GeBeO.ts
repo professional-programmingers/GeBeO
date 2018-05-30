@@ -165,8 +165,7 @@ io.on('connection', async (socket: any) => {
     socket.emit('update queue', null, null, null);
   }
 
-
-  client.on('voiceStateUpdate', (oldMember: Discord.GuildMember, newMember: Discord.GuildMember) => {
+  const voiceStateCallback = (oldMember: Discord.GuildMember, newMember: Discord.GuildMember) => {
     if (oldMember.user == user) {
       vc = newMember.voiceChannel;
       if (vc == null) {
@@ -185,9 +184,11 @@ io.on('connection', async (socket: any) => {
         socket.emit('update queue', nameQueue, Sound.getPlaying(vc.id).name, vc.name || null);  
       }
     }
-  })
+  }
 
-  Sound.on('queue update', (queue, playing, qvcid) => {
+  client.on('voiceStateUpdate', voiceStateCallback);
+
+  const queueUpdateCallback = (queue: any, playing: any, qvcid: any) => {
     if (vc && vc.id == qvcid) {
       if (queue == null && playing == null) {
         socket.emit('update queue', null, null, vc.name || null);
@@ -199,7 +200,9 @@ io.on('connection', async (socket: any) => {
       })
       socket.emit('update queue', nameQueue, playing.name, vc.name || null);
     }
-  })
+  }
+
+  Sound.on('queue update', queueUpdateCallback)
 
   socket.on('queue sound', (sound: string, next: boolean) => {
     Sound.queueSound(sound, vc, next);
@@ -211,6 +214,11 @@ io.on('connection', async (socket: any) => {
 
   socket.on('clear all', () => {
     Sound.clearQueue(vc);
+  })
+
+  socket.on('disconnect', (reason: string) => {
+    Sound.removeListener('queue update', queueUpdateCallback);
+    client.removeListener('voiceStateUpdate', voiceStateCallback);
   })
 })
 
@@ -227,6 +235,39 @@ app.get('/login', (req: any, res: any) => {
     res.redirect('/login?clientid=' + clientid);
   } else {
     res.sendFile(path.join(__dirname, '../../dist/client/index.html'));
+  }
+})
+
+app.get('/api/ytget', async (req: any, res: any) => {
+  if (req.session.discord) {
+    if (req.query.search) {
+      let yttoken: string = fs.readFileSync('tokens/youtube.cfg', 'utf8');
+      yttoken = yttoken.replace(/\s/g, '');
+      request.get('https://www.googleapis.com/youtube/v3/search?part=snippet&q=' + req.query.search + '&type=video&key=' + yttoken, (err, resp, body) => {
+        let videos = JSON.parse(body).items;
+        res.send([{
+          title: videos[0].snippet.title,
+          url: 'https://www.youtube.com/watch?v=' + videos[0].id.videoId,
+          author: videos[0].snippet.channelTitle,
+          thumbnail: videos[0].snippet.thumbnails.default.url
+        }, {
+          title: videos[1].snippet.title,
+          url: 'https://www.youtube.com/watch?v=' + videos[1].id.videoId,
+          author: videos[1].snippet.channelTitle,
+          thumbnail: videos[1].snippet.thumbnails.default.url
+        }, {
+          title: videos[2].snippet.title,
+          url: 'https://www.youtube.com/watch?v=' + videos[2].id.videoId,
+          author: videos[2].snippet.channelTitle,
+          thumbnail: videos[2].snippet.thumbnails.default.url
+        }])  
+      })
+
+    } else {
+      res.sendStatus(400);
+    }
+  } else {
+    res.redirect('/login?clientid=' + clientid);
   }
 })
 

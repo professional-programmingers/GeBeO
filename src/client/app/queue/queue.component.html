@@ -6,13 +6,33 @@
 
 <form class="soundInput" autocomplete="off">
     <mat-form-field class="soundInputBox">
-        <input matInput placeholder="Sound to queue" [disabled]="!inVc" [(ngModel)]="sound" name="sound" autocomplete="off">
-    </mat-form-field> 
-    <button mat-raised-button color="primary" class="soundInputButton" [disabled]="!inVc" (click)="addToQueue()">Queue</button>
-    <button mat-raised-button color="primary" class="soundInputButton" [disabled]="!inVc" (click)="queueNext()">Play Next</button>
+        <input matInput [placeholder]="inputPlaceholder" [disabled]="!inVc" [(ngModel)]="sound" name="sound" autocomplete="off">
+    </mat-form-field>
+    <div *ngIf="!ytSearchEnabled">
+        <button mat-raised-button color="primary" class="soundInputButton" [disabled]="!inVc" (click)="addToQueue()">Queue</button>
+        <button mat-raised-button color="primary" class="soundInputButton" [disabled]="!inVc" (click)="queueNext()">Play Next</button>    
+    </div>
+    <div *ngIf="ytSearchEnabled">
+        <button mat-raised-button color="primary" class="soundInputButton" [disabled]="!inVc || sound == ''" (click)="searchYt()">Search</button>    
+    </div>
+    <mat-slide-toggle color="primary" [(ngModel)]="ytSearchEnabled" (change)="updateYtSearch()" name="ytSwitch" class="nowPlayingButton">
+        YouTube Search
+    </mat-slide-toggle>
 </form>
 
-<mat-list>
+<mat-list *ngIf="videos">
+    <h3 mat-subheader>Results</h3>
+    <mat-list-item *ngFor="let video of videos">
+        <img mat-list-icon src="{{video.thumbnail}}" />
+        <h4 mat-line>{{video.title}}</h4>
+        <p mat-line>{{video.author}}</p>
+        <button mat-raised-button color="primary" class="soundInputButton" (click)="addYtToQueue(video.url)">Queue</button>
+        <button mat-raised-button color="primary" class="soundInputButton" (click)="queueYtNext(video.url)">Play Next</button>    
+    </mat-list-item>
+</mat-list>
+
+<mat-list *ngIf="queue">
+    <h3 mat-subheader>Queue</h3>
     <mat-list-item *ngIf="nowPlaying" class="nowPlayingItem">
         <mat-icon mat-list-icon>play_arrow</mat-icon>
         <p class="nowPlayingText">{{nowPlaying}}</p>
