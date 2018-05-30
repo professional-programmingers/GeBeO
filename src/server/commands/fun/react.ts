@@ -72,7 +72,8 @@ module.exports = class ReactCommand extends Commando.Command {
       targetMessage = await msg.channel.fetchMessage(content.split(' ')[0]);
       content = content.split(' ').slice(1).join(' ');
     }
-    catch{
+    catch (err) {
+      console.log(err);
       targetMessage = (await msg.channel.fetchMessages({limit: 1, before: msg.id})).last();
     }
     let spaceCounter: number = 0;
@@ -90,6 +91,7 @@ module.exports = class ReactCommand extends Commando.Command {
         try {
           await targetMessage.react(emoji);
         } catch (err) {
+          console.log(err);
           if (err instanceof Discord.DiscordAPIError) {
             return;
           }

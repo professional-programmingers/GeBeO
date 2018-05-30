@@ -24,15 +24,16 @@ module.exports = class SoundGetCommand extends Commando.Command {
 
   async run(msg: Commando.CommandMessage, {input}: any): Promise<Discord.Message | Discord.Message[]> {
     if (msg.member.voiceChannel) {
+      let respMsg: Discord.Message = await msg.channel.send('Queueing...') as Discord.Message;
       try {
-        await Sound.queueSound(input, msg.member.voiceChannel);
+        await Sound.queueSound(input, msg.member.voiceChannel, false, respMsg);
       }
       catch(err) {
-        return msg.reply(err);
+        console.log(err);
+        return respMsg.edit(err);
       }
     } else {
       return msg.reply("You have to be in a voice channel to do that!");
     }
-    return msg.reply("Sound queued!");
   }
 }

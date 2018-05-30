@@ -26,6 +26,7 @@ module.exports = class SoundGetCommand extends Commando.Command {
 
   async run(msg: Commando.CommandMessage, {input}: any): Promise<Discord.Message | Discord.Message[]> {
     if (msg.member.voiceChannel) {
+      let respMsg: Discord.Message = await msg.channel.send('Queueing...') as Discord.Message;
       try {
         let yttoken: string = fs.readFileSync('tokens/youtube.cfg', 'utf8');
         yttoken = yttoken.replace(/\s/g, '');
@@ -35,14 +36,14 @@ module.exports = class SoundGetCommand extends Commando.Command {
           })
         });
         
-        Sound.queueSound(resp.items[0].id.videoId, msg.member.voiceChannel);
+        Sound.queueSound(resp.items[0].id.videoId, msg.member.voiceChannel, false, respMsg);
       }
       catch(err) {
-        return msg.reply(err);
+        console.log(err);
+        return respMsg.edit(err);
       }
     } else {
       return msg.channel.send("you have to be in a voice channel to do that!");
     }
-    return msg.channel.send("Sound queued!");
   }
 }

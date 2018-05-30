@@ -129,7 +129,7 @@ module.exports = class RoleMsgCommand extends Commando.Command {
                 return;
               }  
             } catch (error) {
-
+              console.log(error);
             }
           }
           toDelete.push(roleMsgs[i]);

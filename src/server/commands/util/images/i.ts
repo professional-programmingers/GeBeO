@@ -27,8 +27,12 @@ module.exports = class ImageGetCommand extends Commando.Command {
       imageAttachment = fh.getFile(name, msg.guild.id, fh.FileType.Image);
     }
     catch (err) {
-      msg.reply(err);
+      console.log(err);
     }
-    return msg.channel.send({file: {attachment: imageAttachment}});
+    if (imageAttachment) {
+      return msg.channel.send({file: {attachment: imageAttachment}});
+    } else {
+      return msg.channel.send('Invalid image name!');
+    }
   }
 }

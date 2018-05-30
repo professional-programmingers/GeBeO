@@ -136,10 +136,10 @@ export class _Sound extends EventEmitter{
   }
 
 
-  queueSound = async (soundInput: string, voiceChannel: Discord.VoiceChannel, next=false): Promise<void> => {
+  queueSound = async (soundInput: string, voiceChannel: Discord.VoiceChannel, next=false, respMsg?: Discord.Message): Promise<void> => {
     /* Places sound in the prequeue, to be queued up internally.*/
     let soundPromise: Promise<SoundItem> = this.parseSoundInput(soundInput, voiceChannel);
-    this.preQueue.push([soundPromise, voiceChannel, next]);
+    this.preQueue.push([soundPromise, voiceChannel, next, respMsg]);
     try{
       await this.queueNext();
     }
@@ -157,10 +157,13 @@ export class _Sound extends EventEmitter{
     }
     // Locks the prequeue to prevent two instances of this function from happening at the same time.
     this.preQueueLocked = true;
-    let [soundPromise, voiceChannel, next] = this.preQueue.shift();
+    let [soundPromise, voiceChannel, next, respMsg] = this.preQueue.shift();
     let soundItem: SoundItem;
     try{
       soundItem = await soundPromise;
+      if (respMsg) {
+        await respMsg.edit('Queued ' + soundItem.name);
+      }
     }
     catch(err) {
       // Something happened while parsing the sound input.
