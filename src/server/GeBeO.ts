@@ -238,8 +238,10 @@ app.get('/', (req: any, res: any) => {
 
 app.get('/login', (req: any, res: any) => {
   if (req.query.clientid != clientid) {
+    console.log('clientid doesn\'t match, redirecting again');
     res.redirect('/login?clientid=' + clientid);
   } else {
+    console.log('serve login page');
     res.sendFile(path.join(__dirname, '../../dist/client/index.html'));
   }
 })
@@ -320,5 +322,5 @@ app.get('*', (req, res) => {
 });
 
 client.on('ready', () => {
-  server.listen(8080, '0.0.0.0', () => console.log('Example app listening on port 80!'));
+  server.listen(8080, '0.0.0.0', () => console.log('Example app listening on port 8080!'));
 })
