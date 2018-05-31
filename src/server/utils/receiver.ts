@@ -23,6 +23,7 @@ class _Receiver {
       credential = JSON.parse(fs.readFileSync('tokens/watsonCred.json', 'utf8'));
     }
     catch (err) {
+      console.log(err);
       console.log('Warning: No Watson token. Voice recognition will not work!');
       this.speechClient = null;
       return;
@@ -106,6 +107,7 @@ class _Receiver {
       return response.results[0].alternatives[0].transcript;
     }
     catch (err) {
+      console.log(err);
       // Didn't recognize anything.
       return null;
     }

@@ -14,7 +14,7 @@ import {BotPool} from 'utils/bot';
 import {Sound} from 'utils/sounds';
 import { httpify } from 'caseless';
 const sqlite = require('sqlite');
-const lokistore = require('connect-loki');
+const sqlitestore = require('connect-sqlite3');
 
 
 process.on('unhandledRejection', console.error);
@@ -110,11 +110,13 @@ let server = http.createServer(app);
 
 let io = socketio(server);
 
-let LokiStore = lokistore(expresssession);
+let SqliteStore = sqlitestore(expresssession);
 
 let session = expresssession({
-  store: new LokiStore({
-    path: './guilds/session-store.db'
+  store: new SqliteStore({
+    table: 'sessions',
+    db: 'sessions.sqlite3',
+    dir: 'guilds'
   }),
   secret: 'it\'s a secret to everybody',
   resave: true,
@@ -129,7 +131,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(session);
 
-io.use(sharedsession(session));
+io.use(sharedsession(session, {
+  autoSave: true
+}));
 
 io.on('connection', async (socket: any) => {
   if (socket.handshake.session.discord == undefined) {
@@ -313,4 +317,6 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../../dist/client/index.html'));
 });
 
-server.listen(8080, '0.0.0.0', () => console.log('Example app listening on port 80!'));
+client.on('ready', () => {
+  server.listen(8080, '0.0.0.0', () => console.log('Example app listening on port 80!'));
+})

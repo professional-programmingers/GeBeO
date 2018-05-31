@@ -144,6 +144,7 @@ export class _Sound extends EventEmitter{
       await this.queueNext();
     }
     catch(err) {
+      console.log(err);
       throw err;
     }
   };
@@ -163,6 +164,7 @@ export class _Sound extends EventEmitter{
       soundItem = await soundPromise;
     }
     catch(err) {
+      console.log(err);
       // Something happened while parsing the sound input.
       this.preQueueLocked = false;
       throw err;
@@ -210,6 +212,7 @@ export class _Sound extends EventEmitter{
       soundItem.soundType = SoundType.File;
       return soundItem;
     } catch (err) {
+      console.log(err);
       // getFile failed, not a file sound.
       // Code continues.
     }
@@ -224,11 +227,13 @@ export class _Sound extends EventEmitter{
         soundItem.timeStamp = this.parseTimeStamp(soundInput);
       }
       catch (err) {
+        console.log(err);
         console.log("Error with parseTimeStamp:\n" + err.stack);
         soundItem.timeStamp = 0;
       }
       return soundItem;
     } catch (err) {
+      console.log(err);
       // youtube-dl throws an error.
       throw 'Invalid sound file or link!';
     }
