@@ -20,6 +20,7 @@ module.exports = class SoundGetCommand extends Commando.Command {
         Sound.clearQueue(msg.member.voiceChannel);
       }
       catch(err) {
+        console.log(err);
         return msg.reply(err);
       }
     } else {

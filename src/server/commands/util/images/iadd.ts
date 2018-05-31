@@ -34,6 +34,7 @@ module.exports = class ImageAddCommand extends Commando.Command {
       fh.addFile(attachment, msg.guild.id, arg.name, fh.FileType.Image);
     }
     catch (err) {
+      console.log(err);
       return msg.reply(err);
     }
     return msg.reply('Done');

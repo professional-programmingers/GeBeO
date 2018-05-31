@@ -35,6 +35,7 @@ module.exports = class SoundAddCommand extends Commando.Command {
       fh.addFile(attachment, msg.guild.id, arg.name, fh.FileType.Sound);
     }
     catch (err) {
+      console.log(err);
       return msg.reply(err);
     }
     return msg.reply('Done');

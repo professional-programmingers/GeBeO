@@ -31,6 +31,7 @@ module.exports = class SoundRemoveCommand extends Commando.Command {
       fh.removeFile(name, msg.guild.id, fh.FileType.Sound);
     }
     catch (err) {
+      console.log(err);
       return msg.reply('Error: ' + err);
     }
     return msg.reply('Done');
