@@ -228,8 +228,10 @@ io.on('connection', async (socket: any) => {
 
 app.get('/', (req: any, res: any) => {
   if (req.session.discord) {
+    console.log('session found, serving html');
     res.sendFile(path.join(__dirname, '../../dist/client/index.html'));
   } else {
+    console.log('session not found, redirecting to login');
     res.redirect('/login?clientid=' + clientid);
   }
 })
