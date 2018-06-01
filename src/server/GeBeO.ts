@@ -322,5 +322,5 @@ app.get('*', (req, res) => {
 });
 
 client.on('ready', () => {
-  server.listen(8080, '0.0.0.0', () => console.log('Example app listening on port 8080!'));
+  server.listen(8080, '0.0.0.0', () => console.log('GeBeO express server listening on port 8080!'));
 })
