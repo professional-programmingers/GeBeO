@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "outDir": "../../dist/server",
         "target": "es6",
         "module": "commonjs",
         "moduleResolution": "Node",
